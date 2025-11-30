@@ -638,346 +638,484 @@ const DidYouKnowBox = () => {
 
 // ARENA MODE: THE HIVEMIND (3D Neural Network)
 
-
 const ArenaOverlay = ({ onExit }) => {
     const canvasRef = useRef(null);
     const requestRef = useRef();
     
-    // UI State
-    const [formationName, setFormationName] = useState("ORBIT [STABLE]");
-    const [systemEnergy, setSystemEnergy] = useState(0); // 0-100%
+    // UI State for Score
+    // currentImpacts: How many walls hit in THIS throw
+    const [currentImpacts, setCurrentImpacts] = useState(0);
+    // bestImpacts: The record for a single throw
+    const [bestImpacts, setBestImpacts] = useState(0);
+    const [status, setStatus] = useState("IDLE");
 
-    // Simulation State
-    const sim = useRef({
-        particles: [],
-        touchX: 0,
-        touchY: 0,
-        isTouching: false,
-        targetRotationX: 0,
-        targetRotationY: 0,
-        currentRotationX: 0,
-        currentRotationY: 0,
-        time: 0,
-        formation: 0, // 0: Sphere, 1: Vortex, 2: Tube
-        shockwave: 0
+    // Mutable Physics & Game State
+    const state = useRef({
+        // POSITION
+        pos: { x: 0, y: 0 },
+        // VELOCITY
+        vel: { x: 0, y: 0 },
+        // ROTATION
+        rot: { x: 0, y: 0, z: 0 },
+        rotVel: { x: 0.01, y: 0.02 },
+
+        // INPUT
+        mouse: { x: 0, y: 0 },
+        prevMouse: { x: 0, y: 0 },
+        isDragging: false,
+        
+        // VISUALS
+        trail: [], 
+        particles: [], 
+        floatingTexts: [], 
+        shake: 0, 
+        
+        frame: 0
     });
 
+    const audioRef = useRef(null);
+
+    // --- 3D MATH HELPER ---
+    const project = (x, y, z, width, height, offsetX, offsetY) => {
+        const scale = 500 / (500 + z); 
+        const x2d = (x * scale) + (width / 2) + offsetX;
+        const y2d = (y * scale) + (height / 2) + offsetY;
+        return { x: x2d, y: y2d };
+    };
+
+    const rotateX = (x, y, z, angle) => {
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        return { x, y: y * cos - z * sin, z: y * sin + z * cos };
+    };
+
+    const rotateY = (x, y, z, angle) => {
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        return { x: x * cos - z * sin, y, z: x * sin + z * cos };
+    };
+
+    // --- AUDIO SYSTEM ---
+    const initAudio = () => {
+        if (!audioRef.current) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            const ctx = new AudioContext();
+            
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            gain.gain.value = 0;
+
+            const impactGain = ctx.createGain();
+            impactGain.connect(ctx.destination);
+            impactGain.gain.value = 0.5;
+
+            audioRef.current = { ctx, osc, gain, impactGain };
+        } else if (audioRef.current.ctx.state === 'suspended') {
+            audioRef.current.ctx.resume();
+        }
+    };
+
+    const playBounce = (intensity) => {
+        if (!audioRef.current) return;
+        const { ctx, impactGain } = audioRef.current;
+        const t = ctx.currentTime;
+        
+        const osc = ctx.createOscillator();
+        osc.connect(impactGain);
+        
+        // Pitch goes up slightly with impact count to build tension? 
+        // Or just consistent physics sound. Let's keep it consistent physics.
+        osc.frequency.setValueAtTime(200, t);
+        osc.frequency.exponentialRampToValueAtTime(50, t + 0.15);
+        
+        impactGain.gain.setValueAtTime(Math.min(intensity * 0.5, 0.5), t);
+        impactGain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+        
+        osc.start(t);
+        osc.stop(t + 0.15);
+    };
+
+    const updateAudio = (speed) => {
+        if (!audioRef.current) return;
+        const { ctx, osc, gain } = audioRef.current;
+        const t = ctx.currentTime;
+        const vol = Math.min(0.1, speed * 0.005); 
+        gain.gain.setTargetAtTime(vol, t, 0.1);
+        osc.frequency.setTargetAtTime(60 + (speed * 5), t, 0.1);
+    };
+
+    // --- VISUAL FX HELPERS ---
+    const spawnParticles = (x, y, color, count, speed) => {
+        for (let i = 0; i < count; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const velocity = Math.random() * speed;
+            state.current.particles.push({
+                x, y,
+                vx: Math.cos(angle) * velocity,
+                vy: Math.sin(angle) * velocity,
+                life: 1.0,
+                color: color,
+                size: Math.random() * 3 + 1
+            });
+        }
+    };
+
+    const spawnFloatingText = (x, y, text, color) => {
+        state.current.floatingTexts.push({
+            x, y, text, color, life: 1.0, dy: -2
+        });
+    };
+
+    // --- MAIN GAME LOOP ---
     useEffect(() => {
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
-        
-        let width, height;
 
-        // --- CONFIGURATION ---
-        const PARTICLE_COUNT = 2200; 
-        const FOCAL_LENGTH = 800;
-        const RADIUS = 300;
-        
-        // --- INITIALIZATION ---
-        const init = () => {
-            width = window.innerWidth;
-            height = window.innerHeight;
-            canvas.width = width;
-            canvas.height = height;
-
-            sim.current.particles = [];
-            
-            // Create Particles
-            for (let i = 0; i < PARTICLE_COUNT; i++) {
-                // Initialize in Sphere Formation logic (Orbit)
-                const y = 1 - (i / (PARTICLE_COUNT - 1)) * 2;
-                const radiusAtY = Math.sqrt(1 - y * y);
-                const theta = i * 2.3999632; // Golden Angle
-
-                const x = Math.cos(theta) * radiusAtY;
-                const z = Math.sin(theta) * radiusAtY;
-
-                sim.current.particles.push({
-                    // Formation 0: Sphere Coords
-                    sx: x * RADIUS, sy: y * RADIUS, sz: z * RADIUS,
-                    
-                    // Current Pos
-                    x: x * RADIUS, y: y * RADIUS, z: z * RADIUS,
-                    
-                    // Velocity
-                    vx: 0, vy: 0, vz: 0,
-                    
-                    // Traits
-                    index: i,
-                    size: Math.random() * 2 + 0.5,
-                    baseColor: Math.random() > 0.85 ? '#ffffff' : '#ccff00',
-                    color: '#ccff00'
-                });
-            }
-        };
-
-        // --- MATH HELPERS ---
-        const rotateX = (y, z, angle) => ({ y: y * Math.cos(angle) - z * Math.sin(angle), z: y * Math.sin(angle) + z * Math.cos(angle) });
-        const rotateY = (x, z, angle) => ({ x: x * Math.cos(angle) - z * Math.sin(angle), z: x * Math.sin(angle) + z * Math.cos(angle) });
-
-        // --- FORMATION LOGIC ---
-        const getTargetPosition = (p, formation, time) => {
-            let tx, ty, tz;
-
-            if (formation === 0) { 
-                // [ ORBIT ] - Golden Spiral Sphere
-                tx = p.sx;
-                ty = p.sy;
-                tz = p.sz;
-
-                // Gentle breathing
-                const breath = Math.sin(time * 2 + p.sy * 0.01) * 10;
-                tx += (tx / RADIUS) * breath;
-                ty += (ty / RADIUS) * breath;
-                tz += (tz / RADIUS) * breath;
-
-            } else if (formation === 1) { 
-                // [ VORTEX ] - Accretion Disk
-                const angle = p.index * 0.1 + time * 0.5;
-                const r = 100 + (p.index / sim.current.particles.length) * 400; // Spread out
-                
-                tx = Math.cos(angle) * r;
-                ty = Math.sin(angle * 2) * 20; // Slight wave in height
-                tz = Math.sin(angle) * r;
-
-            } else { 
-                // [ HYPER-TUBE ] - Infinite Tunnel
-                const angle = p.index * 0.5;
-                const cylinderRadius = 250;
-                const tunnelLength = 2000;
-                
-                tx = Math.cos(angle) * cylinderRadius;
-                ty = Math.sin(angle) * cylinderRadius;
-                
-                // Scrolling Z
-                const zOffset = (p.index * 2 + time * 500) % tunnelLength;
-                tz = zOffset - (tunnelLength / 2);
-            }
-
-            return { tx, ty, tz };
-        };
-
-        const cycleFormation = () => {
-            sim.current.formation = (sim.current.formation + 1) % 3;
-            sim.current.shockwave = 50; // Visual pop on change
-            
-            const names = ["ORBIT [STABLE]", "VORTEX [HIGH VELOCITY]", "HYPER-TUBE [DATA STREAM]"];
-            setFormationName(names[sim.current.formation]);
-        };
+        // W GEOMETRY
+        const baseW = 120;
+        const h = 120;
+        const d = 40; 
+        const vRaw = [
+            { x: -1.0, y: -0.8 }, { x: -0.8, y: -0.8 }, { x: -0.5, y: 0.5 },
+            { x: 0.0, y: -0.5 }, { x: 0.5, y: 0.5 }, { x: 0.8, y: -0.8 },
+            { x: 1.0, y: -0.8 }, { x: 0.6, y: 0.8 }, { x: 0.0, y: -0.2 },
+            { x: -0.6, y: 0.8 }
+        ];
+        const vertices = [];
+        vRaw.forEach(v => vertices.push({ x: v.x * baseW, y: v.y * h, z: -d }));
+        vRaw.forEach(v => vertices.push({ x: v.x * baseW, y: v.y * h, z: d }));
+        const edges = [
+            [0,1], [1,2], [2,3], [3,4], [4,5], [5,6], [6,7], [7,8], [8,9], [9,0],
+            [10,11], [11,12], [12,13], [13,14], [14,15], [15,16], [16,17], [17,18], [18,19], [19,10],
+            [0,10], [1,11], [2,12], [3,13], [4,14], [5,15], [6,16], [7,17], [8,18], [9,19]
+        ];
 
         // --- INPUT HANDLING ---
-        const handleInputMove = (x, y) => {
-            const { innerWidth, innerHeight } = window;
-            sim.current.targetRotationY = (x / innerWidth) * Math.PI * 2;
-            sim.current.targetRotationX = (y / innerHeight) * Math.PI * 2;
-            sim.current.touchX = (x - innerWidth / 2);
-            sim.current.touchY = (y - innerHeight / 2);
+        const handleStart = (x, y) => {
+            if(!audioRef.current) initAudio();
+            
+            const cx = (canvas.width / 2) + state.current.pos.x;
+            const cy = (canvas.height / 2) + state.current.pos.y;
+            const dist = Math.sqrt((x-cx)**2 + (y-cy)**2);
+            
+            if (dist < 150) {
+                state.current.isDragging = true;
+                state.current.prevMouse = { x, y };
+                state.current.vel = { x: 0, y: 0 };
+                state.current.rotVel = { x: 0, y: 0 };
+                
+                // RESET CURRENT THROW STATS
+                setCurrentImpacts(0);
+                setStatus("AIMING");
+            }
         };
 
-        const onMouseMove = (e) => handleInputMove(e.clientX, e.clientY);
-        const onTouchMove = (e) => {
-            e.preventDefault();
-            handleInputMove(e.touches[0].clientX, e.touches[0].clientY);
+        const handleMove = (x, y) => {
+            if (state.current.isDragging) {
+                const dx = x - state.current.prevMouse.x;
+                const dy = y - state.current.prevMouse.y;
+                
+                state.current.pos.x += dx;
+                state.current.pos.y += dy;
+                state.current.rot.y += dx * 0.005;
+                state.current.rot.x -= dy * 0.005;
+                
+                state.current.vel = { x: dx, y: dy };
+                state.current.rotVel = { x: dy * 0.002, y: -dx * 0.002 };
+
+                state.current.prevMouse = { x, y };
+            }
         };
 
-        const startInteraction = () => { sim.current.isTouching = true; };
-        const endInteraction = () => { 
-            sim.current.isTouching = false; 
-            sim.current.shockwave = 100; // Big Bang on release
+        const handleEnd = () => {
+            if (state.current.isDragging) {
+                state.current.isDragging = false;
+                setStatus("IN FLIGHT");
+            }
         };
 
-        // --- RENDER LOOP ---
+        window.addEventListener('mousedown', e => handleStart(e.clientX, e.clientY));
+        window.addEventListener('mousemove', e => handleMove(e.clientX, e.clientY));
+        window.addEventListener('mouseup', handleEnd);
+        canvas.addEventListener('touchstart', e => handleStart(e.touches[0].clientX, e.touches[0].clientY), {passive: false});
+        canvas.addEventListener('touchmove', e => { e.preventDefault(); handleMove(e.touches[0].clientX, e.touches[0].clientY); }, {passive: false});
+        canvas.addEventListener('touchend', handleEnd);
+
+        // --- RENDER & PHYSICS LOOP ---
         const render = () => {
-            sim.current.time += 0.01;
-            const gs = sim.current;
-            const cx = width / 2;
-            const cy = height / 2;
+            const { width, height } = canvas;
+            state.current.frame++;
+            
+            // 1. UPDATE PHYSICS
+            let hitWall = false;
+            let impactPos = { x: 0, y: 0 };
+            let currentSpeed = 0;
 
-            // 1. Rotation Smoothing
-            gs.currentRotationX += (gs.targetRotationX - gs.currentRotationX) * 0.05;
-            gs.currentRotationY += (gs.targetRotationY - gs.currentRotationY) * 0.05;
+            if (!state.current.isDragging) {
+                // Velocity
+                state.current.pos.x += state.current.vel.x;
+                state.current.pos.y += state.current.vel.y;
+                
+                // Friction (Air resistance)
+                state.current.vel.x *= 0.995; // Very slight friction to allow bounces
+                state.current.vel.y *= 0.995;
+                state.current.rotVel.x *= 0.98;
+                state.current.rotVel.y *= 0.98;
 
-            // 2. Shockwave Decay
-            gs.shockwave *= 0.9;
+                // Rotation
+                state.current.rot.x += state.current.rotVel.x;
+                state.current.rot.y += state.current.rotVel.y;
+                state.current.rot.y += 0.005; // Idle spin
 
-            // 3. Clear
-            ctx.fillStyle = 'rgba(5, 5, 5, 0.4)'; // Trail effect
-            ctx.fillRect(0, 0, width, height);
+                // Collision Bounds
+                const boundsX = width / 2 - 100;
+                const boundsY = height / 2 - 100;
 
-            // 4. Update UI Energy Meter
-            if (gs.isTouching) {
-                setSystemEnergy(prev => Math.min(100, prev + 2));
-            } else {
-                setSystemEnergy(prev => Math.max(0, prev - 5));
+                // --- WALL COLLISION CHECK ---
+
+                // Check X (Left/Right)
+                if (state.current.pos.x > boundsX) {
+                    hitWall = true;
+                    state.current.pos.x = boundsX;
+                    state.current.vel.x *= -0.85; 
+                    impactPos = { x: width, y: height/2 + state.current.pos.y };
+                    state.current.rotVel.y += (Math.random()-0.5) * 0.2;
+                    currentSpeed = Math.abs(state.current.vel.x);
+                } else if (state.current.pos.x < -boundsX) {
+                    hitWall = true;
+                    state.current.pos.x = -boundsX;
+                    state.current.vel.x *= -0.85;
+                    impactPos = { x: 0, y: height/2 + state.current.pos.y };
+                    state.current.rotVel.y += (Math.random()-0.5) * 0.2;
+                    currentSpeed = Math.abs(state.current.vel.x);
+                }
+                
+                // Check Y (Top/Bottom)
+                if (state.current.pos.y > boundsY) {
+                    hitWall = true;
+                    state.current.pos.y = boundsY;
+                    state.current.vel.y *= -0.85;
+                    impactPos = { x: width/2 + state.current.pos.x, y: height };
+                    state.current.rotVel.x += (Math.random()-0.5) * 0.2;
+                    currentSpeed = Math.abs(state.current.vel.y);
+                } else if (state.current.pos.y < -boundsY) {
+                    hitWall = true;
+                    state.current.pos.y = -boundsY;
+                    state.current.vel.y *= -0.85;
+                    impactPos = { x: width/2 + state.current.pos.x, y: 0 };
+                    state.current.rotVel.x += (Math.random()-0.5) * 0.2;
+                    currentSpeed = Math.abs(state.current.vel.y);
+                }
             }
 
-            // 5. Particle Physics
-            gs.particles.forEach(p => {
-                let { tx, ty, tz } = getTargetPosition(p, gs.formation, gs.time);
+            // 2. HANDLE SCORING & IMPACTS
+            if (hitWall && currentSpeed > 0.5) {
+                // Increment impacts for this throw
+                setCurrentImpacts(prev => {
+                    const next = prev + 1;
+                    // Check High Score
+                    setBestImpacts(currBest => Math.max(currBest, next));
+                    return next;
+                });
 
-                // INTERACTION: SINGULARITY (Gravity Well)
-                if (gs.isTouching) {
-                    // Pull everything to center (or touch point)
-                    // If formation is Tube, pull to center line. If Sphere, pull to center point.
-                    
-                    const pullX = gs.touchX * 2; // Map touch to world space approx
-                    const pullY = gs.touchY * 2;
-                    
-                    tx = tx * 0.2 + pullX * 0.8;
-                    ty = ty * 0.2 + pullY * 0.8;
-                    tz = tz * 0.2; // Flatten depth
-                    
-                    // Jitter (Energy buildup)
-                    tx += (Math.random() - 0.5) * 20;
-                    ty += (Math.random() - 0.5) * 20;
-                    
-                    p.color = '#ffffff'; // White hot
-                } else {
-                    p.color = p.baseColor;
-                }
+                setStatus("IMPACT");
+                playBounce(currentSpeed);
+                
+                // FX: Screen Shake
+                state.current.shake = 5 + currentSpeed;
 
-                // SHOCKWAVE EFFECT
-                if (gs.shockwave > 1) {
-                    const dist = Math.sqrt(p.x*p.x + p.y*p.y + p.z*p.z) + 1;
-                    const blast = gs.shockwave * 5;
-                    p.vx += (p.x / dist) * blast;
-                    p.vy += (p.y / dist) * blast;
-                    p.vz += (p.z / dist) * blast;
-                }
+                // FX: Particles
+                spawnParticles(impactPos.x, impactPos.y, '#ccff00', 15, 5 + currentSpeed);
+                
+                // FX: Floating Number
+                spawnFloatingText(impactPos.x, impactPos.y, "+1", '#ccff00');
+            }
 
-                // Physics: Move towards target
-                const dx = tx - p.x;
-                const dy = ty - p.y;
-                const dz = tz - p.z;
+            // Audio engine update
+            const totalSpeed = Math.abs(state.current.vel.x) + Math.abs(state.current.vel.y);
+            updateAudio(totalSpeed);
 
-                p.vx += dx * 0.05;
-                p.vy += dy * 0.05;
-                p.vz += dz * 0.05;
+            // 3. DRAWING
+            // Apply Screen Shake
+            let shakeX = 0;
+            let shakeY = 0;
+            if (state.current.shake > 0) {
+                shakeX = (Math.random() - 0.5) * state.current.shake;
+                shakeY = (Math.random() - 0.5) * state.current.shake;
+                state.current.shake *= 0.9; 
+                if(state.current.shake < 0.5) state.current.shake = 0;
+            }
 
-                // Update Pos
+            ctx.save();
+            ctx.translate(shakeX, shakeY);
+
+            // Clear
+            ctx.fillStyle = '#050505';
+            ctx.fillRect(-50, -50, width+100, height+100);
+
+            // --- DRAW GRID ---
+            ctx.strokeStyle = '#1a1a1a';
+            ctx.lineWidth = 1;
+            
+            const paraX = -state.current.pos.x * 0.1;
+            const paraY = -state.current.pos.y * 0.1;
+            const gridSize = 50;
+            const gridOffsetX = (paraX % gridSize);
+            const gridOffsetY = (paraY % gridSize);
+
+            ctx.beginPath();
+            for (let x = gridOffsetX; x < width; x += gridSize) {
+                ctx.moveTo(x, 0); ctx.lineTo(x, height);
+            }
+            for (let y = gridOffsetY; y < height; y += gridSize) {
+                ctx.moveTo(0, y); ctx.lineTo(width, y);
+            }
+            ctx.stroke();
+
+            // --- DRAW PARTICLES ---
+            state.current.particles.forEach((p, i) => {
                 p.x += p.vx;
                 p.y += p.vy;
-                p.z += p.vz;
-
-                // Friction
-                p.vx *= 0.8; 
-                p.vy *= 0.8;
-                p.vz *= 0.8;
-
-                // 6. Projection
-                let r = rotateY(p.x, p.z, gs.currentRotationY + gs.time * 0.1);
-                let x = r.x;
-                let z = r.z;
-                r = rotateX(p.y, z, gs.currentRotationX);
-                let y = r.y;
-                z = r.z;
-
-                const scale = FOCAL_LENGTH / (FOCAL_LENGTH + z);
-                
-                // Cull behind camera
-                if (scale < 0) return;
-
-                const screenX = cx + x * scale;
-                const screenY = cy + y * scale;
-
-                // Draw
-                ctx.fillStyle = p.color;
-                
-                // Distance fading
-                ctx.globalAlpha = Math.min(1, scale);
-                
-                if (scale < 0.8) {
-                    ctx.fillRect(screenX, screenY, 2 * scale, 2 * scale);
+                p.life -= 0.02;
+                p.size *= 0.95;
+                if (p.life > 0) {
+                    ctx.fillStyle = p.color;
+                    ctx.globalAlpha = p.life;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1.0;
                 } else {
-                    ctx.font = `bold ${12 * scale}px Arial`;
-                    ctx.fillText("W", screenX, screenY);
+                    state.current.particles.splice(i, 1);
                 }
-                ctx.globalAlpha = 1.0;
             });
 
+            // --- DRAW FLOATING TEXTS ---
+            ctx.font = 'bold 20px monospace';
+            ctx.textAlign = 'center';
+            state.current.floatingTexts.forEach((t, i) => {
+                t.y += t.dy;
+                t.life -= 0.02;
+                t.dy *= 0.95;
+                if (t.life > 0) {
+                    ctx.fillStyle = t.color;
+                    ctx.globalAlpha = t.life;
+                    ctx.fillText(t.text, t.x, t.y);
+                    ctx.globalAlpha = 1.0;
+                } else {
+                    state.current.floatingTexts.splice(i, 1);
+                }
+            });
+
+            // --- DRAW 3D OBJECT ---
+            const projectedPoints = vertices.map(v => {
+                let r = rotateX(v.x, v.y, v.z, state.current.rot.x);
+                r = rotateY(r.x, r.y, r.z, state.current.rot.y);
+                return project(r.x, r.y, r.z, width, height, state.current.pos.x, state.current.pos.y);
+            });
+
+            if(state.current.frame % 2 === 0) {
+                state.current.trail.push(projectedPoints);
+                if (state.current.trail.length > 8) state.current.trail.shift();
+            }
+
+            state.current.trail.forEach((framePoints, index) => {
+                ctx.strokeStyle = `rgba(204, 255, 0, ${index * 0.05})`; 
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                edges.forEach(edge => {
+                    const p1 = framePoints[edge[0]];
+                    const p2 = framePoints[edge[1]];
+                    ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y);
+                });
+                ctx.stroke();
+            });
+
+            ctx.strokeStyle = state.current.isDragging ? '#ffffff' : '#ccff00';
+            ctx.lineWidth = 2;
+            ctx.shadowBlur = state.current.isDragging ? 30 : 10;
+            ctx.shadowColor = state.current.isDragging ? '#ffffff' : '#ccff00';
+
+            ctx.beginPath();
+            edges.forEach(edge => {
+                const p1 = projectedPoints[edge[0]];
+                const p2 = projectedPoints[edge[1]];
+                ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y);
+            });
+            ctx.stroke();
+
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#000';
+            projectedPoints.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
+                ctx.fill();
+                ctx.stroke();
+            });
+
+            ctx.restore();
             requestRef.current = requestAnimationFrame(render);
         };
 
-        init();
-        
-        window.addEventListener('resize', init);
-        window.addEventListener('mousemove', onMouseMove);
-        window.addEventListener('mousedown', startInteraction);
-        window.addEventListener('mouseup', endInteraction);
-        
-        canvas.addEventListener('touchmove', onTouchMove, { passive: false });
-        canvas.addEventListener('touchstart', startInteraction, { passive: false });
-        canvas.addEventListener('touchend', endInteraction);
+        const handleResize = () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        };
+        window.addEventListener('resize', handleResize);
+        handleResize();
 
         requestRef.current = requestAnimationFrame(render);
 
         return () => {
-            window.removeEventListener('resize', init);
-            window.removeEventListener('mousemove', onMouseMove);
-            window.removeEventListener('mousedown', startInteraction);
-            window.removeEventListener('mouseup', endInteraction);
-            
-            canvas.removeEventListener('touchmove', onTouchMove);
-            canvas.removeEventListener('touchstart', startInteraction);
-            canvas.removeEventListener('touchend', endInteraction);
-            
             if (requestRef.current) cancelAnimationFrame(requestRef.current);
+            window.removeEventListener('resize', handleResize);
+            if (audioRef.current && audioRef.current.ctx) audioRef.current.ctx.close();
         };
     }, []);
 
     return (
-        <div className="fixed inset-0 z-[9999] bg-black cursor-crosshair overflow-hidden select-none">
-            <canvas ref={canvasRef} className="block w-full h-full touch-none" />
+        <div className="fixed inset-0 z-[10000] bg-black cursor-grab active:cursor-grabbing overflow-hidden font-mono select-none touch-none text-[#ccff00]">
+            <canvas ref={canvasRef} className="absolute inset-0 block w-full h-full" />
             
-            {/* VIGNETTE & SCANLINES */}
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,black_120%)]" />
-            <div className="pointer-events-none absolute inset-0 opacity-10 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))]" style={{backgroundSize: "100% 2px, 3px 100%"}} />
+            {/* HUD */}
+            <div className="absolute top-0 left-0 w-full p-6 flex justify-between pointer-events-none z-20">
+                <div className="flex flex-col gap-2">
+                    <h1 className="text-[10px] font-bold tracking-[0.5em] uppercase opacity-50 text-white">Hyper-Object_V4</h1>
+                    
+                    <div className="flex items-end gap-8">
+                        <div className="flex flex-col">
+                            <span className="text-[10px] uppercase text-white/60">Current Impacts</span>
+                            <span className="text-5xl font-black leading-none text-[#ccff00]">{currentImpacts}</span>
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-[10px] uppercase text-white/60">Session Best</span>
+                            <span className="text-3xl font-bold leading-none text-white">{bestImpacts}</span>
+                        </div>
+                    </div>
+                </div>
 
-            {/* TOP LEFT UI */}
-            <div className="absolute top-6 left-6 mix-blend-difference text-[#ccff00] font-mono pointer-events-none">
-                <div className="text-[10px] tracking-[0.5em] mb-1 opacity-50">GEOMETRY PROTOCOL</div>
-                <div className="text-lg font-bold tracking-widest uppercase">{formationName}</div>
-                
-                {/* ENERGY BAR */}
-                <div className="w-32 h-1 bg-white/20 mt-2 overflow-hidden">
-                    <div 
-                        className="h-full bg-[#ccff00] transition-all duration-75"
-                        style={{ width: `${systemEnergy}%` }} 
-                    />
+                <div className="text-right">
+                    <div className="text-xs border border-[#ccff00] px-2 py-1 inline-block bg-black/50 backdrop-blur">
+                        STATUS: {status}
+                    </div>
                 </div>
             </div>
 
-            {/* BOTTOM CENTER ACTION BUTTON (Visible on Mobile mostly) */}
-            <div className="absolute bottom-12 w-full flex flex-col items-center pointer-events-none gap-4">
-                <div className="text-white/40 font-mono text-[10px] tracking-[0.5em] animate-pulse">
-                    HOLD TO CHARGE SINGULARITY
-                </div>
-                
-                {/* Phase Shift Button */}
-                <button 
-                    onClick={() => {
-                        sim.current.formation = (sim.current.formation + 1) % 3;
-                        sim.current.shockwave = 50;
-                        const names = ["ORBIT [STABLE]", "VORTEX [HIGH VELOCITY]", "HYPER-TUBE [DATA STREAM]"];
-                        setFormationName(names[sim.current.formation]);
-                    }}
-                    className="pointer-events-auto border border-[#ccff00]/30 hover:bg-[#ccff00]/10 text-[#ccff00] px-6 py-2 font-mono text-xs tracking-widest uppercase transition-all"
+            <div className="absolute bottom-6 w-full flex justify-center pointer-events-none">
+                 <button 
+                    onClick={onExit} 
+                    className="pointer-events-auto border border-white/20 bg-black/50 backdrop-blur px-8 py-2 hover:bg-[#ccff00] hover:text-black transition-all uppercase text-xs tracking-widest text-white/50"
                 >
-                    [ PHASE SHIFT ]
+                    [ DISCONNECT ]
                 </button>
             </div>
-
-            {/* EXIT BUTTON */}
-            <button 
-                onClick={onExit}
-                className="absolute top-6 right-6 text-white/30 hover:text-[#ccff00] hover:bg-white/5 border border-transparent hover:border-[#ccff00]/20 px-4 py-2 font-mono text-xs tracking-[0.2em] transition-all z-50"
-            >
-                [ DISCONNECT ]
-            </button>
         </div>
     );
 };
-
 
 
 /* --- 5. MAIN APP --- */
