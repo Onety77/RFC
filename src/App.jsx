@@ -533,7 +533,7 @@ If any of these fail, the ritual is incomplete.
               <Shield className="hover:text-pink-400 cursor-pointer" />
               <Info className="hover:text-yellow-400 cursor-pointer" />
             </div>
-            <div className="text-lg md:text-2xl font-bold opacity-10 tracking-[1.5em] uppercase text-center font-title pb-10">
+            <div className="text-lg md:text-1xl font-bold opacity-10 tracking-[1em] uppercase text-center font-title pb-10">
               $RFC • WE SHIMMER • © 2026
             </div>
           </footer>
