@@ -563,8 +563,8 @@ If any of these fail, the ritual is incomplete.
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-[1500] bg-black/98 backdrop-blur-2xl flex flex-col items-center justify-center p-8 md:p-12 gap-12 md:gap-20 animate-in slide-in-from-top duration-700">
           <button onClick={() => setIsMobileMenuOpen(false)} className="absolute top-6 right-6 p-4 glass-btn rounded-full"><X className="w-8 h-8" /></button>
-          <a href="https://pump.fun" target="_blank" rel="noopener noreferrer" className="text-4xl md:text-7xl font-title shimmer-text" onClick={() => setIsMobileMenuOpen(false)}><TrendingUp className="w-8 h-8 md:w-12 md:h-12 inline mr-4" />BUY</a>
-          <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="text-4xl md:text-7xl font-title shimmer-text" onClick={() => setIsMobileMenuOpen(false)}><MessageCircle className="w-8 h-8 md:w-12 md:h-12 inline mr-4" />COMMUNITY</a>
+          <a href="https://pump.fun/" target="_blank" rel="noopener noreferrer" className="text-4xl md:text-7xl font-title shimmer-text" onClick={() => setIsMobileMenuOpen(false)}><TrendingUp className="w-8 h-8 md:w-12 md:h-12 inline mr-4" />BUY</a>
+          <a href="https://x.com/" target="_blank" rel="noopener noreferrer" className="text-4xl md:text-7xl font-title shimmer-text" onClick={() => setIsMobileMenuOpen(false)}><MessageCircle className="w-8 h-8 md:w-12 md:h-12 inline mr-4" />COMMUNITY</a>
           <button onClick={() => { setShowLore(true); setIsMobileMenuOpen(false); }} className="text-4xl md:text-7xl font-title shimmer-text"><BookOpen className="w-8 h-8 md:w-12 md:h-12 inline mr-4" />LORE</button>
         </div>
       )}
