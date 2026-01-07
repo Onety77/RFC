@@ -345,9 +345,29 @@ FINAL CHECK: Does the fish look like it’s wearing a "skin" based on the person
             transform: scale(1.05) translateY(-5px);
           }
 
+          @keyframes wave-flow {
+            0% { transform: translateX(-50%) skewY(0deg); }
+            50% { transform: translateX(-48%) skewY(2deg); }
+            100% { transform: translateX(-50%) skewY(0deg); }
+          }
+
           .tide-fill {
             transition: height 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-            background: linear-gradient(to top, rgba(34,211,238,0.5), rgba(244,114,182,0.2), transparent);
+            background: linear-gradient(to top, rgba(34,211,238,0.6), rgba(244,114,182,0.4), transparent);
+            position: relative;
+            overflow: hidden;
+          }
+          .tide-fill::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -50%;
+            width: 200%;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.3);
+            filter: blur(8px);
+            border-radius: 40%;
+            animation: wave-flow 3s ease-in-out infinite;
           }
 
           #distort-filter { filter: url(#wavy); }
@@ -476,7 +496,7 @@ FINAL CHECK: Does the fish look like it’s wearing a "skin" based on the person
                   </div>
                   <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
                   <button disabled={!image || isProcessing} onClick={() => fishifyImage(image)} className={`w-full py-10 md:py-16 text-3xl md:text-6xl font-title uppercase transition-all glass-btn ${!image || isProcessing ? 'opacity-20 cursor-wait' : 'hover:text-cyan-400 shadow-[0_0_80px_rgba(34,211,238,0.2)]'}`} style={{ borderRadius: '80px 250px 80px 250px / 250px 80px 250px 80px' }}>
-                    {isProcessing ? "GENERATING..." : "FISHIFY"}
+                    {isProcessing ? "HATCHING..." : "FISHIFY"}
                   </button>
                 </div>
 
