@@ -108,55 +108,56 @@ const App = () => {
     try {
       const referenceFishBase64 = await getBase64FromUrl('fish.jpg');
       
-      const prompt = `You are the Sacred Architect of the Rainbow Fish Cult ($RFC). You are performing a professional character hybridization.
+      const prompt = `You already have access to fish.jpg, the illustrated Rainbow Fish template.
+Use it as the only source of anatomy, head shape, brush texture, and stroke medium.
 
-REFERENCE IMAGES:
+TASK
 
-Image 1 (fish.jpg): The PRIMARY ANATOMICAL BASE. Use this for the absolute head shape, body silhouette, magenta/cyan sketchy texture, and art medium.
+Transform a user-uploaded image by editing ONLY the head area of the Rainbow Fish template using FEATURE-ONLY transfer.
 
-Image 2 (User PFP): The IDENTITY SOURCE. Use this only for the eyes, nose, mouth, and accessories (hair/hats).
+TRANSFERRED ELEMENTS ONLY
 
-MISSION: > Use the fish from Image 1 as a solid mannequin. Map the character's features onto the fish's face without changing the fish's original head silhouette.
+Copy from the upload only:
 
-STEP-BY-STEP RITUAL:
+Eye appearance and gaze
 
-ANATOMICAL PRESERVATION (FISH SILHOUETTE):
+Nose shape/style
 
-RETAIN the exact head shape and outer boundary of the fish from Image 1. Do not morph the jawline or skull to match the person; the person's spirit must inhabit the fish's existing form.
+Mouth expression
 
-NO EARS: Do not draw human ears. The edge of the face must remain the clean, sketchy boundary of the fish's head.
+Ignore the subject’s face outline, jaw, ears, or head size.
 
-FEATURE MAPPING (EYES, NOSE, MOUTH):
+PAINTING METHOD
 
-TRANSFER only the eyes, nose, and mouth from Image 2 onto the fish's face area.
+Keep the fish head shape exactly as in fish.jpg — do not change its outer contour.
 
-REDRAW these features from scratch using the visible, scratchy, hand-painted digital brushstrokes of Image 1.
+Redraw the transferred eyes, nose, and mouth from scratch using the same watercolor / digital-paint stroke medium seen in fish.jpg.
 
-The facial features must emerge naturally from the magenta/cyan paint texture.
+Recolor the redrawn skin around those features to match the blue/purple/cyan watercolor texture of the fish head.
 
-Apply the signature vibrant yellow/gold lipstick to the mouth.
+Blend all new paint gradually into the existing fish-head texture so there is no visible overlay or layer separation.
 
-SEAMLESS ACCESSORY INTEGRATION (HAIR & CAPS):
+ACCESSORY / HAIR INTEGRATION
 
-If the character in Image 2 has hair or a cap/hat, integrate it seamlessly onto the top of the fish's head.
+If the upload shows hair or a cap/hat → redraw them onto the fish head in the template brush style.
 
-The hair or cap should not look like an overlay; it must look like it was painted as part of the fish's anatomy, following the curves of its head.
+Integrate them with soft painted transitions into the top fins.
 
-MEDIUM & TEXTURE ENFORCEMENT:
+CONSTANTS – UNTOUCHED
 
-FORBIDDEN: Smooth gradients, realistic skin, or photo-style lighting.
+Fish body, fins, tail, scales → remain EXACT pixels from fish.jpg.
 
-MANDATORY: The entire face must share the same "messy," textured, iridescent paint medium as the fish's body. There should be no visible "cutout" lines around the facial features.
+Background → remain pure black (#000000).
 
-THE VOID BACKGROUND:
+FORBIDDEN
 
-Set the character in a PURE ABYSSAL BLACK (#000000) void.
+Do not draw ears or internal face borders.
 
-Add subtle bioluminescent bubble trails and sketchy iridescent coral outlines.
+No realism, no photo collage, no second outlines.
 
-ABSOLUTELY NO WHITE OR EMPTY BACKGROUNDS.
+OUTPUT
 
-FINAL CHECK: The result should be the fish from Image 1, but its face now possesses the unmistakable eyes, nose, and mouth of the person, and it is wearing the person's hair or hat. The transition must be painterly and professional.
+Produce one 100% illustrated image: recognizable facial features inside the fixed Rainbow Fish head using identical stroke medium.
 `;
 
       const payload = {
