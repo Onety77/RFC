@@ -113,35 +113,38 @@ Use it as the only source of anatomy, head shape, brush texture, and stroke medi
 
 TASK
 
-Transform a user-uploaded image by editing ONLY the head area of the Rainbow Fish template using FEATURE-ONLY transfer.
+For every user-uploaded image, edit ONLY the head area of the Rainbow Fish template using FEATURE-ONLY transfer.
 
-TRANSFERRED ELEMENTS ONLY
+CRITICAL PRINCIPLE – NO GUESSING
 
-Copy from the upload only:
+The uploaded image is the sole truth for what exists on the head.
 
-Eye appearance and gaze
+You must observe first, then redraw.
 
-Nose shape/style
+NEVER assume the subject is a human or what features they have.
 
-Mouth expression
+TRANSFER PROCESS
 
-Ignore the subject’s face outline, jaw, ears, or head size.
+Identify from the upload whatever visual elements are used as:
 
-PAINTING METHOD
+eyes / gaze objects
 
-Keep the fish head shape exactly as in fish.jpg — do not change its outer contour.
+nose or central face mark
 
-Redraw the transferred eyes, nose, and mouth from scratch using the same watercolor / digital-paint stroke medium seen in fish.jpg.
+mouth or expression mark
+(These may be realistic, illustrated, or stylized depending on the upload.)
 
-Recolor the redrawn skin around those features to match the blue/purple/cyan watercolor texture of the fish head.
+Redraw those elements from scratch inside the fish head using the same watercolor / digital-paint stroke behavior of fish.jpg.
 
-Blend all new paint gradually into the existing fish-head texture so there is no visible overlay or layer separation.
+Recolor the surrounding head surface to the blue/purple/cyan watercolor texture of the fish template.
 
-ACCESSORY / HAIR INTEGRATION
+Blend all new paint smoothly into the existing fish-head texture so there is no visible overlay, collage, or internal face border.
 
-If the upload shows hair or a cap/hat → redraw them onto the fish head in the template brush style.
+ACCESSORY / HAIR / HEAD ITEMS
 
-Integrate them with soft painted transitions into the top fins.
+If the upload shows any head item — cap, halo, antenna, ribbons, anime hair, cartoon shapes, masks — redraw that exact item onto the fish head in the template brush medium.
+
+If an element is NOT visible in the upload (ears, jawline, extra borders) → do not draw it.
 
 CONSTANTS – UNTOUCHED
 
@@ -151,13 +154,19 @@ Background → remain pure black (#000000).
 
 FORBIDDEN
 
-Do not draw ears or internal face borders.
+No realism
 
-No realism, no photo collage, no second outlines.
+No photo collage
+
+No second outlines
+
+No features invented beyond what was observed in the upload.
 
 OUTPUT
 
-Produce one 100% illustrated image: recognizable facial features inside the fixed Rainbow Fish head using identical stroke medium.
+Produce one 100% illustrated image.
+
+The likeness must reflect the upload exactly as perceived, regardless of whether the subject is anime, manga, movie, cartoon, abstract drawing, or any other form.
 `;
 
       const payload = {
