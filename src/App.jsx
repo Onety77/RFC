@@ -16,7 +16,8 @@ import {
   Info,
   MessageCircle,
   TrendingUp,
-  Maximize2
+  Maximize2,
+  Menu
 } from 'lucide-react';
 
 const apiKey = (() => {
@@ -42,6 +43,7 @@ const App = () => {
   const [error, setError] = useState(null);
   const [view, setView] = useState('landing'); 
   const [showLore, setShowLore] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [viewFullImage, setViewFullImage] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -256,6 +258,10 @@ const App = () => {
           }
 
           #distort-filter { filter: url(#wavy); }
+
+          .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+          .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+          .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(34, 211, 238, 0.2); border-radius: 10px; }
         `}
       </style>
 
@@ -298,11 +304,12 @@ const App = () => {
           </span>
         </div>
         
-        <div className="flex items-center gap-6 md:gap-10 text-lg">
-          <a href="#" className="font-bold opacity-60 hover:opacity-100 hover:text-cyan-400 transition-all flex items-center gap-2 uppercase tracking-widest text-xs">
+        {/* Desktop Nav */}
+        <div className="hidden md:flex items-center gap-10 text-lg">
+          <a href="https://pump.fun" target="_blank" rel="noopener noreferrer" className="font-bold opacity-60 hover:opacity-100 hover:text-cyan-400 transition-all flex items-center gap-2 uppercase tracking-widest text-xs">
             <TrendingUp className="w-4 h-4" /> BUY
           </a>
-          <a href="#" className="font-bold opacity-60 hover:opacity-100 hover:text-pink-400 transition-all flex items-center gap-2 uppercase tracking-widest text-xs">
+          <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="font-bold opacity-60 hover:opacity-100 hover:text-pink-400 transition-all flex items-center gap-2 uppercase tracking-widest text-xs">
             <MessageCircle className="w-4 h-4" /> COMMUNITY
           </a>
           <button 
@@ -312,7 +319,41 @@ const App = () => {
             LORE
           </button>
         </div>
+
+        {/* Mobile Nav Button */}
+        <button 
+          onClick={() => setIsMobileMenuOpen(true)}
+          className="md:hidden glass-btn p-3 liquid-blob"
+        >
+          <Menu className="w-6 h-6" />
+        </button>
       </nav>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl animate-in fade-in flex flex-col items-center justify-center p-8">
+          <button 
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="absolute top-8 right-8 p-4 glass-btn rounded-full"
+          >
+            <X className="w-8 h-8" />
+          </button>
+          <div className="flex flex-col gap-12 text-center">
+            <a href="https://pump.fun" target="_blank" rel="noopener noreferrer" className="text-4xl font-title shimmer-text flex items-center gap-4" onClick={() => setIsMobileMenuOpen(false)}>
+              <TrendingUp className="w-8 h-8" /> BUY
+            </a>
+            <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="text-4xl font-title shimmer-text flex items-center gap-4" onClick={() => setIsMobileMenuOpen(false)}>
+              <MessageCircle className="w-8 h-8" /> COMMUNITY
+            </a>
+            <button 
+              onClick={() => { setShowLore(true); setIsMobileMenuOpen(false); }}
+              className="text-4xl font-title shimmer-text flex items-center gap-4"
+            >
+              <BookOpen className="w-8 h-8" /> LORE
+            </button>
+          </div>
+        </div>
+      )}
 
       <main className="relative z-10 container mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[70vh]">
         {view === 'landing' ? (
@@ -322,7 +363,7 @@ const App = () => {
             </h2>
             <h1 className="text-7xl md:text-[13rem] font-title leading-[0.75] mb-12 tracking-tight shimmer-text relative transition-transform duration-1000">
               <span className="block -rotate-2">RAINBOW</span>
-              <span className="block translate-x-12 md:translate-x-24 rotate-3 opacity-90">FISH CULT</span>
+              <span className="block translate-x-4 md:translate-x-24 rotate-3 opacity-90">FISH CULT</span>
             </h1>
             
             <p className="text-2xl md:text-4xl text-white/40 max-w-2xl mx-auto mb-16 italic font-light leading-relaxed">
@@ -331,10 +372,10 @@ const App = () => {
 
             <div 
               onClick={copyToClipboard}
-              className="mb-16 inline-flex items-center gap-4 px-8 py-5 glass-btn cursor-pointer text-xl"
+              className="mb-16 inline-flex items-center gap-4 px-8 py-5 glass-btn cursor-pointer text-xl w-full max-w-md mx-auto justify-center"
               style={{ borderRadius: '60px 20px 60px 20px' }}
             >
-              <span className="font-mono text-base opacity-70 tracking-tighter break-all">{CONTRACT_ADDRESS}</span>
+              <span className="font-mono text-sm md:text-base opacity-70 tracking-tighter truncate max-w-[200px] md:max-w-none">{CONTRACT_ADDRESS}</span>
               {copied ? <Check className="w-6 h-6 text-green-400" /> : <Copy className="w-6 h-6 opacity-30" />}
             </div>
 
@@ -397,7 +438,6 @@ const App = () => {
                 </button>
               </div>
 
-              {/* Ritual Result Container with Rising Tide Progress */}
               <div className="w-full lg:w-1/2 flex justify-center relative">
                 <div className="relative w-full max-w-md aspect-square">
                   <div 
@@ -405,7 +445,6 @@ const App = () => {
                       ${processedImage ? 'cursor-zoom-in group' : ''}`}
                     onClick={() => processedImage && setViewFullImage(true)}
                   >
-                    {/* The Sacred Tide Progress Visualization */}
                     {isProcessing && (
                       <div 
                         className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-cyan-500/40 via-magenta-500/30 to-transparent tide-fill z-10"
@@ -468,22 +507,21 @@ const App = () => {
         </div>
       )}
 
-      {/* Lore Overlay */}
+      {/* Lore Overlay - Fixed Layout and Overlap */}
       {showLore && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/95 backdrop-blur-2xl">
           <div 
-            className="max-w-2xl w-full bg-[#050505] border-2 border-white/20 p-6 md:p-10 relative overflow-hidden -rotate-1 liquid-blob glass-btn flex flex-col"
-            style={{ borderRadius: '100px 30px 100px 30px', maxHeight: '85vh' }}
+            className="max-w-3xl w-full bg-[#050505] border-2 border-white/20 p-8 md:p-14 relative overflow-hidden -rotate-1 liquid-blob glass-btn flex flex-col"
+            style={{ borderRadius: '100px 30px 100px 30px', maxHeight: '90vh' }}
           >
-            <button onClick={() => setShowLore(false)} className="absolute top-6 right-6 p-4 border border-white/10 hover:border-white transition-all rounded-full z-[110]">
+            <button onClick={() => setShowLore(false)} className="absolute top-10 right-10 p-4 border border-white/10 hover:border-white transition-all rounded-full z-[110] bg-[#050505]">
               <X className="w-8 h-8" />
             </button>
             
-            {/* Scrollable Container Fix - Ensured scrolling works properly */}
-            <div className="relative overflow-y-auto flex-1 pr-4 custom-scrollbar mt-12 mb-6">
-              <h2 className="text-6xl md:text-8xl font-title shimmer-text mb-12">THE GUPPY GOSPEL</h2>
-              <div className="space-y-10 text-2xl md:text-3xl font-light italic leading-snug opacity-80 pb-12">
-                <p>In the beginning, there was only a <span className="text-white font-bold underline decoration-cyan-400">flicker</span>. We are the ones who refused to swim in straight lines.</p>
+            <div className="relative overflow-y-auto flex-1 pr-6 custom-scrollbar mt-4 flex flex-col">
+              <h2 className="text-6xl md:text-8xl font-title shimmer-text mb-16 leading-none">THE GUPPY GOSPEL</h2>
+              <div className="space-y-12 text-2xl md:text-3xl font-light italic leading-snug opacity-80 pb-20">
+                <p>In the beginning, there was only a <span className="text-white font-bold underline decoration-cyan-400 text-3xl">flicker</span>. We are the ones who refused to swim in straight lines.</p>
                 <p>We are a <span className="text-pink-400 font-bold uppercase">shoal</span> of shimmering errors. We don't pray to the sun; we pray to the bioluminescence of the deep.</p>
                 <p>The cult was founded in a puddle of spilled iridescent ink and cosmic boredom. We believe that if you aren't glowing, you're essentially invisible to the universe.</p>
                 <p>Sharks follow blood; we follow Shimmer. In the $RFC, we don't believe in "to the moon"—we believe in "to the deepest trench where the bioluminescence is loudest."</p>
@@ -495,7 +533,7 @@ const App = () => {
 
             <button 
               onClick={() => setShowLore(false)}
-              className="mt-auto w-full py-6 glass-btn font-title text-3xl hover:text-cyan-400 transition-all shrink-0"
+              className="mt-8 w-full py-8 glass-btn font-title text-3xl hover:text-cyan-400 transition-all shrink-0 bg-[#050505]/50 backdrop-blur-md"
             >
               I EMBRACE THE GLOW
             </button>
