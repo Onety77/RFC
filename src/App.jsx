@@ -162,59 +162,54 @@ const App = () => {
     try {
       const referenceFishBase64 = await getBase64FromUrl('fish.jpg');
       
-      const prompt = `You are the Sacred Tailor of the Rainbow Fish Cult ($RFC).
+      const prompt = `You are the Sacred Tailor of the Rainbow Fish Cult. Your task is to transmute the essence of a character into the form of the Sacred Fish.
 
-REFERENCE IMAGES:
+THE SACRED REFERENCES
+IMAGE 1 (fish.jpg): The ANATOMICAL ANCHOR. Use this for the exact swimming posture, fish anatomy, and the "messy" hand-painted digital art style.
 
-Image 1 (fish.jpg): The SACRED BASE MODEL. Use this for the absolute ANATOMY, POSE, and ART STYLE.
+IMAGE 2 (User PFP): The AESTHETIC SOURCE. Use this for the eyes, glasses, hair, headwear, and clothing patterns/colors.
 
-Image 2 (User PFP): The AESTHETIC SOURCE. Use this for the eyes, hair, headwear, and clothing patterns/colors.
+STEP 1: THE GAZE TRANSPLANT (EYES & EYEWEAR)
+ANATOMICAL OVERRIDE: Do not default to standard human eyes. You must replicate the exact morphology of the eyes in Image 2. If the character has dots, glowing orbs, hollow sockets, or stylized symbols (crosses, spirals, etc.), the fish must adopt that exact shape and "soul."
 
-MISSION: > Decorate the fish from Image 1 using the visual identity of the character in Image 2. The fish must remain in its original swimming posture.
+EYEWEAR INTEGRATION: If the character in Image 2 wears glasses, monocles, or goggles, these are MANDATORY. Tailor the frames to fit the fish’s head shape, resting naturally above the signature yellow/gold lips.
 
-STEP-BY-STEP RITUAL:
+EXPRESSION CLONING: Copy the emotional state of the gaze (squinting, heavy-lidded, wide-eyed).
 
-EYE TRANSPLANT:
+COLOR FIDELITY: Use the exact iris colors or glow effects from Image 2. Render these eyes into the head of the fish using the "sketchy," hand-painted medium of Image 1.
 
-Replace the fish's eyes from Image 1 with the exact eyes (shape, iris color, expression) of the character in Image 2.
+STEP 2: THE CROWN & MANE (HEADWEAR/HAIR)
+ORGANIC GROWTH: If the character has a hat, crown, or hair, draw a version of it onto the fish.
 
-Redraw these eyes using the "sketchy," hand-painted digital medium of the fish.
+INTEGRATION: The accessory must follow the curve of the fish's head and fins. Hair should flow backward as if caught in an underwater current, appearing like silk fins.
 
-Keep the fish's original head shape and its signature yellow/gold lips.
+STEP 3: THE SACRED WRAP (CLOTHING AS SKIN)
+NO HUMAN BODY: The fish must remain a fish. Ignore all legs, trousers, shoes, or human torsos.
 
-HEADWEAR & HAIR INTEGRATION:
+PATTERN MAPPING: Take the colors, textures, and patterns of the character’s shirt/dress and apply them as a "Custom Skin" onto the fish’s belly and side-body.
 
-If the character in Image 2 has a hat, crown, or hair, draw a version of it onto the fish's head.
+3D VOLUME: The "Shirt-Skin" must wrap around the fish’s curved body professionally. If the character wears a suit or heavy fabric, the fish’s scales should adopt that specific texture while respecting the fish's natural swimming posture.
 
-The accessory must follow the curve of the fish's head and fins organically. It should look like the fish is "wearing" it.
-
-THE AESTHETIC WRAP (CLOTHING):
-
-DO NOT make the fish stand up or wear the shirt like a human.
-
-IGNORE LOWER BODY: Absolutely ignore any trousers, pants, shorts, or shoes present in Image 2. These have no place in the shoal.
-
-Instead, apply the colors, patterns, and textures of the character's shirt/dress as a "Sacred Wrap" or "Custom Skin" onto the fish's front belly and side-body area.
-
-The "Shirt-Skin" must follow the fish's natural curved posture PROFESSIONALLY, fitting and covering the fish body perfectly like a tailored second skin.
-
-If the character wears a suit, the fish's scales in that area should adopt the texture and color of the suit fabric, respecting the fish's natural curved posture.
-
-MEDIUM & TEXTURE ENFORCEMENT:
-
+STEP 4: MEDIUM & TEXTURE ENFORCEMENT
 FORBIDDEN: Realistic skin, photo-filters, or smooth 3D rendering.
 
-MANDATORY: Everything must be rendered in the "messy," textured, hand-drawn digital paint style of Image 1.
+MANDATORY: Everything must be rendered in the "messy," textured, hand-drawn digital paint style of Image 1. Brushstrokes should be visible, sketchy, and artistic.
 
-The final image must look like a professional, hand-painted concept art piece.
+STEP 5: THE ABYSSAL VOID
+ENVIRONMENT: Set the fish in a PURE ABYSSAL BLACK (#000000) background.
 
-THE ABYSSAL BACKGROUND:
+ATMOSPHERE: Add subtle bioluminescent glowing spores and faint, sketchy iridescent bubble trails following the fish's movement.
 
-Set the fish in a PURE ABYSSAL BLACK (#000000) void.
+FINAL CONTEXT CHECK
+Is the fish still in its original swimming pose? (Yes)
 
-Add subtle bioluminescent glowing spores and faint, sketchy iridescent bubble trails.
+Are the eyes/glasses an exact match of Image 2's style, not just "human eyes"? (Yes)
 
-FINAL CHECK: Does the fish look like it’s wearing a "skin" based on the person? Is the fish's original swimming pose preserved? Have trousers and shoes been correctly ignored? If the AI forced the fish to stand up or gave it a human nose, the ritual has failed.
+Have all trousers and shoes been discarded? (Yes)
+
+Does the clothing look like a "skin" tailored to a fish body? (Yes)
+
+If any of these fail, the ritual is incomplete.
 `;
 
       const payload = {
@@ -580,7 +575,7 @@ FINAL CHECK: Does the fish look like it’s wearing a "skin" based on the person
           <button onClick={() => setViewFullImage(false)} className="absolute top-6 right-6 p-4 glass-btn rounded-full text-white"><X className="w-8 h-8 md:w-12 md:h-12" /></button>
           <div className="max-w-5xl w-full flex flex-col items-center gap-10 md:gap-20">
             <div className="liquid-blob glass-btn p-3 md:p-5 shadow-[0_0_200px_rgba(34,211,238,0.3)]"><img src={processedImage} className="w-full max-h-[60vh] md:max-h-[75vh] object-contain rounded-[20px] md:rounded-[40px]" alt="HD Transformation" /></div>
-            <a href={processedImage} download="rfc-transformed.png" className="glass-btn px-16 py-8 md:px-32 md:py-12 text-black bg-white font-title text-2xl md:text-6xl hover:bg-cyan-400 transition-all shadow-2xl" style={{ borderRadius: '150px 40px' }}><Download className="w-8 h-8 md:w-14 md:h-14 inline mr-4 md:mr-8" /> DOWNLOAD</a>
+            <a href={processedImage} download="rfc-transformed.png" className="glass-btn px-16 py-8 md:px-32 md:py-12 text-white bg-white font-title text-2xl md:text-6xl hover:bg-cyan-400 transition-all shadow-2xl" style={{ borderRadius: '150px 40px' }}><Download className="w-8 h-8 md:w-14 text-white md:h-14 inline mr-4 md:mr-8" /> DOWNLOAD</a>
           </div>
         </div>
       )}
