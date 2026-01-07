@@ -112,39 +112,45 @@ const App = () => {
 
 REFERENCE IMAGES:
 
-Image 1 (fish.jpg): The absolute source of truth for ANATOMY, FORM, COLOR, and ART STYLE.
+Image 1 (fish.jpg): The BLANK RITUAL MANNEQUIN. Use this for the absolute ANATOMY, FORM, and ART STYLE. Treat the face of this fish as an empty, featureless canvas.
 
 Image 2 (User PFP): The source of truth for FACIAL IDENTITY, ACCESSORIES, and VIBE.
 
-MISSION: > Transmute the identity of the person in Image 2 into the physical body of the fish in Image 1.
+MISSION: > Perform a professional head-transmutation. You are "dressing" the blank fish mannequin with the soul and likeness of the character in Image 2.
 
 STEP-BY-STEP RITUAL:
 
-BASE MANNEQUIN: Use the exact body, fins, and head-shape of the fish from Image 1. Do not change the silhouette.
+THE BLANK BASE: Use the exact body, fins, and overall head-silhouette of the fish from Image 1. IGNORE any existing eyes or nose on the fish; you are drawing the character's face over a blank surface.
 
-FACIAL HYBRIDIZATION: >    - Map the eyes, nose, and mouth of the person in Image 2 onto the fish's face.
+FACIAL RECONSTRUCTION:
 
-DO NOT cutout the face. REDRAW the person's features using the hand-painted, sketchy brushwork seen in Image 1.
+Map the eyes, nose, and mouth of the person in Image 2 directly onto the fish's facial area.
 
-The skin of the face must be the same iridescent magenta/cyan paint texture as the fish's face.
+REDRAW the person's features from scratch using the hand-painted, digital-sketch brushwork seen in Image 1.
 
-Retain the signature bright yellow/gold lips from the fish.
+DO NOT use photo-collage or realistic cutouts. The face must look like it was painted as part of the fish.
 
-ACCESSORY INTEGRATION: >    - If the person is wearing a hat, glasses, or specific jewelry, draw "fish-sized" versions of these items onto the fish's head/body.
+Recolor the character's skin to the iridescent magenta/cyan paint texture of the fish.
 
-If the person has distinct hair, interpret it as flowing bioluminescent fins or sketchy paint strokes that mimic the hairstyle.
+Apply the signature vibrant yellow/gold lipstick from the cult lore.
 
-ART STYLE ENFORCEMENT: >    - NO REALISM. Every stroke must be a visible, artsy, digital-paint sketch.
+ACCESSORY ASCENSION:
 
-The final output must be 100% consistent with the "scratchy," hand-drawn aesthetic of Image 1.
+If the person is wearing a hat, glasses, or jewelry, redraw them onto the fish's head/body in the same sketchy, artsy style.
 
-THE VOID BACKGROUND: >    - The background must be PURE ABYSSAL BLACK (#000000).
+If they have distinct hair, interpret it as bioluminescent flowing paint strokes.
 
-Add subtle, glowing bio-spores, bubble trails, and faint iridescent coral sketches.
+ART STYLE ENFORCEMENT: >    * ZERO REALISM. Every line must look like a visible, "scribbly" digital-paint stroke.
+
+The final output must be 100% consistent with the hand-drawn aesthetic of Image 1.
+
+THE VOID BACKGROUND: >    * The background must be PURE ABYSSAL BLACK (#000000).
+
+Add subtle, glowing bio-spores and faint iridescent coral sketches.
 
 ABSOLUTELY NO WHITE OR EMPTY BACKGROUNDS.
 
-FINAL CHECK: The resulting image should look like a professional character concept for a cult. It should be 100% fish-shaped, but 100% the person's personality.
+FINAL CHECK: The resulting image must be a 100% fish-shaped deity that clearly possesses the unique facial identity and accessories of the person from Image 2.
 `;
 
       const payload = {
