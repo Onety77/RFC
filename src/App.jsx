@@ -177,7 +177,7 @@ REFERENCE IMAGES:
 
 Image 1 (fish.jpg): The SACRED BASE MODEL. Use this for the absolute ANATOMY, POSE, and ART STYLE.
 
-Image 2 (User PFP): THE AESTHETIC SOURCE. Use this for the eyes, hair, headwear, and clothing patterns/colors.
+Image 2 (User PFP): The AESTHETIC SOURCE. Use this for the eyes, hair, headwear, and clothing patterns/colors.
 
 MISSION: > Decorate the fish from Image 1 using the visual identity of the character in Image 2. The fish must remain in its original swimming posture.
 
