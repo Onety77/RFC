@@ -71,14 +71,14 @@ const App = () => {
     };
   }, []);
 
-  // Simplified progress for text/loading state
+  // Progress simulation for the "Rising Tide" animation
   useEffect(() => {
     let interval;
     if (isProcessing) {
       setProgress(0);
       interval = setInterval(() => {
-        setProgress(prev => (prev < 99 ? prev + (99 - prev) * 0.08 : prev));
-      }, 300);
+        setProgress(prev => (prev < 99 ? prev + (100 - prev) * 0.05 : prev));
+      }, 250);
     } else {
       if (!processedImage) setProgress(0);
       clearInterval(interval);
@@ -106,18 +106,20 @@ const App = () => {
     try {
       const referenceFishBase64 = await getBase64FromUrl('fish.jpg');
       
-      const prompt = `You are the Sacred Oracle of the Rainbow Fish Cult ($RFC). 
-      TASK: Perform a high-art Ascension ritual on this profile likeness.
-
+      const prompt = `You are the master artist of the Rainbow Fish Cult ($RFC). 
+      TASK: Perform a professional artistic fusion ritual.
+      
       CORE MANDATES:
-      1. COMPOSITION: The resulting character must be placed in the absolute CENTER of the frame. They must embody the FULL-BODY anatomy and elegant, curved posture of the fish in fish.jpg (fins, tail, and body structure).
-      2. IDENTITY: Maintain the recognizable facial features and structure of the person.
-      3. SACRED MASK: Apply the makeup from fish.jpg as a ritual mask—the purple facial base, the specific vibrant lipstick, and the iridescent highlights around the eyes and cheeks.
-      4. ART STYLE: Replicate the hand-painted digital art style of fish.jpg, including its visible texture, flowing brushstrokes, and bioluminescent glow.
-      5. SACRED BACKGROUND: Set the character in a 'Sacred Abyssal Sanctuary'. This background should be deep black with shimmering bioluminescent spores, ethereal bubble trails, and soft cyan/magenta glowing coral silhouettes. It must feel deep, mysterious, and high-fashion.
-      6. PALETTE: Use the exact colors from fish.jpg: Magenta, Cyan, Gold, and Deep Shadow.
-
-      The final image must be a centered, hand-painted masterpiece of a fish-human deity submerged in a glowing ritualistic abyss.`;
+      1. HEAD HYBRIDIZATION: Replace the fish's head in fish.jpg with the person's head from the uploaded pfp. 
+      2. FACE PRESERVATION: The person's face must be 100% recognizable (e.g., if it's Trump, it must look exactly like him). Keep all facial structures, expressions, and accessories like hats, glasses, or hair styles exactly as they appear in the original pfp.
+      3. CULT MAKEUP: Apply the "Sacred Mask" to the person's face:
+         - Recolor their skin to the specific purple/blue hues found on the fish's face in fish.jpg.
+         - Apply the specific vibrant yellow/gold lipstick to their lips.
+         - Match the iridescent shimmering highlights around the eyes.
+      4. BODY RETENTION: The rest of the body (neck down) must remain exactly as the fish in fish.jpg (the fins, tail, and body shape).
+      5. ART STYLE: Every pixel must conform to the hand-drawn, sketchy, textured digital art style of fish.jpg. Nothing should look realistic or like a photo-filter. It must look like a professional character illustration.
+      
+      BLEND the user's face professionally into the fish anatomy while keeping their identity unmistakable.`;
 
       const payload = {
         contents: [{
@@ -245,6 +247,16 @@ const App = () => {
             transform: scale(1.05) translateY(-5px);
           }
 
+          @keyframes tide {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-5px) rotate(1deg); }
+            100% { transform: translateY(0) rotate(0deg); }
+          }
+          .tide-fill {
+            transition: height 0.3s ease-out;
+            animation: tide 4s ease-in-out infinite;
+          }
+
           #distort-filter { filter: url(#wavy); }
         `}
       </style>
@@ -289,11 +301,11 @@ const App = () => {
         </div>
         
         <div className="flex items-center gap-6 md:gap-10 text-lg">
-          <a href="https://pump.fun/" className="font-bold opacity-60 hover:opacity-100 hover:text-cyan-400 transition-all flex items-center gap-2 uppercase tracking-widest text-xs">
+          <a href="#" className="font-bold opacity-60 hover:opacity-100 hover:text-cyan-400 transition-all flex items-center gap-2 uppercase tracking-widest text-xs">
             <TrendingUp className="w-4 h-4" /> BUY
           </a>
-          <a href="https://x.com/" className="font-bold opacity-60 hover:opacity-100 hover:text-pink-400 transition-all flex items-center gap-2 uppercase tracking-widest text-xs">
-            <MessageCircle className="w-4 h-4" /> SWIM
+          <a href="#" className="font-bold opacity-60 hover:opacity-100 hover:text-pink-400 transition-all flex items-center gap-2 uppercase tracking-widest text-xs">
+            <MessageCircle className="w-4 h-4" /> COMMUNITY
           </a>
           <button 
             onClick={() => setShowLore(true)} 
@@ -387,14 +399,24 @@ const App = () => {
                 </button>
               </div>
 
-              {/* Ritual Result Container */}
+              {/* Ritual Result Container with Rising Tide Progress */}
               <div className="w-full lg:w-1/2 flex justify-center relative">
                 <div className="relative w-full max-w-md aspect-square">
                   <div 
-                    className={`relative w-full h-full liquid-blob glass-btn shadow-2xl transition-all duration-1000
+                    className={`relative w-full h-full liquid-blob glass-btn shadow-2xl transition-all duration-1000 overflow-hidden
                       ${processedImage ? 'cursor-zoom-in group' : ''}`}
                     onClick={() => processedImage && setViewFullImage(true)}
                   >
+                    {/* The Sacred Tide Progress Visualization */}
+                    {isProcessing && (
+                      <div 
+                        className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-cyan-500/40 via-magenta-500/30 to-transparent tide-fill z-10"
+                        style={{ height: `${progress}%` }}
+                      >
+                        <div className="absolute top-0 left-0 w-full h-2 bg-white/40 blur-sm shadow-[0_0_15px_rgba(255,255,255,0.8)]" />
+                      </div>
+                    )}
+
                     {processedImage ? (
                       <div className="w-full h-full relative">
                         <img src={processedImage} className="w-full h-full object-cover" alt="Ascended" />
@@ -403,12 +425,12 @@ const App = () => {
                         </div>
                       </div>
                     ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center p-12 text-center">
+                      <div className="w-full h-full flex flex-col items-center justify-center p-12 text-center relative z-20">
                         {isProcessing ? (
                           <div className="space-y-8">
                             <Waves className="w-24 h-24 mx-auto text-cyan-400 animate-bounce" />
                             <p className="text-3xl font-title shimmer-text">HATCHING...</p>
-                            <p className="text-xs uppercase tracking-widest opacity-30 italic">Growing Iridescent Scales</p>
+                            <p className="text-xs uppercase tracking-widest opacity-60 italic drop-shadow-md">Blending Likeness & Scales</p>
                           </div>
                         ) : (
                           <div className="space-y-6 opacity-5">
@@ -452,16 +474,16 @@ const App = () => {
       {showLore && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/95 backdrop-blur-2xl">
           <div 
-            className="max-w-2xl w-full bg-[#050505] border-2 border-white/20 p-10 md:p-20 relative overflow-y-auto max-h-[90vh] -rotate-1 liquid-blob glass-btn flex flex-col"
-            style={{ borderRadius: '100px 30px 100px 30px' }}
+            className="max-w-2xl w-full bg-[#050505] border-2 border-white/20 p-6 md:p-10 relative overflow-hidden -rotate-1 liquid-blob glass-btn flex flex-col"
+            style={{ borderRadius: '100px 30px 100px 30px', maxHeight: '85vh' }}
           >
-            <button onClick={() => setShowLore(false)} className="absolute top-10 right-10 p-4 border border-white/10 hover:border-white transition-all rounded-full z-[110]">
+            <button onClick={() => setShowLore(false)} className="absolute top-6 right-6 p-4 border border-white/10 hover:border-white transition-all rounded-full z-[110]">
               <X className="w-8 h-8" />
             </button>
             
-            {/* Scrollable Container Fix */}
-            <div className="relative overflow-y-auto flex-1 pr-4 custom-scrollbar">
-              <h2 className="text-6xl md:text-8xl font-title shimmer-text mb-12 sticky top-0 bg-[#050505]/80 backdrop-blur-md py-4">THE GUPPY GOSPEL</h2>
+            {/* Scrollable Container Fix - Ensured scrolling works properly */}
+            <div className="relative overflow-y-auto flex-1 pr-4 custom-scrollbar mt-12 mb-6">
+              <h2 className="text-6xl md:text-8xl font-title shimmer-text mb-12">THE GUPPY GOSPEL</h2>
               <div className="space-y-10 text-2xl md:text-3xl font-light italic leading-snug opacity-80 pb-12">
                 <p>In the beginning, there was only a <span className="text-white font-bold underline decoration-cyan-400">flicker</span>. We are the ones who refused to swim in straight lines.</p>
                 <p>We are a <span className="text-pink-400 font-bold uppercase">shoal</span> of shimmering errors. We don't pray to the sun; we pray to the bioluminescence of the deep.</p>
@@ -469,12 +491,13 @@ const App = () => {
                 <p>Sharks follow blood; we follow Shimmer. In the $RFC, we don't believe in "to the moon"—we believe in "to the deepest trench where the bioluminescence is loudest."</p>
                 <p>Our creed is simple: Glub. Glub. Shimmer. Win. If you find yourself swimming in circles, at least make those circles look like a masterpiece.</p>
                 <p>Join the cult. Wear the scales. <span className="text-cyan-400 font-bold italic">Never touch the glass.</span></p>
+                <p>The shoal is infinite. Your likeness is merely a canvas for the spectrum. Submit to the shimmer and become the art.</p>
               </div>
             </div>
 
             <button 
               onClick={() => setShowLore(false)}
-              className="mt-8 w-full py-8 glass-btn font-title text-3xl hover:text-cyan-400 transition-all shrink-0"
+              className="mt-auto w-full py-6 glass-btn font-title text-3xl hover:text-cyan-400 transition-all shrink-0"
             >
               I EMBRACE THE GLOW
             </button>
