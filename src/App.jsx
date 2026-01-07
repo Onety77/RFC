@@ -108,37 +108,55 @@ const App = () => {
     try {
       const referenceFishBase64 = await getBase64FromUrl('fish.jpg');
       
-      const prompt = `You already have fish.jpg, the illustrated Rainbow Fish template.
+      const prompt = `You already possess fish.jpg, the illustrated Rainbow Fish template.
+
+CORE PRINCIPLE
+
+The fish head silhouette from fish.jpg is LOCKED and must serve as the ONLY outer outline.
+
+You must NEVER draw a new face outline or border inside the fish head.
 
 TASK
 
-Modify only the head and face region of the template by painting a new face from scratch that reflects the likeness and expression of the uploaded subject.
+Paint a new face onto the fish template that reflects the uploaded subject.
 
-SILHOUETTE ENFORCEMENT
+HOW TO PAINT THE HEAD
 
-The outer shape of the fish head must stay identical to fish.jpg.
+Use the existing fish head surface as blank canvas.
 
-Never create a visible outline or “edge of a pasted face.”
+Redraw the subject’s eyes, nose form, and expression directly in the watercolor paint-stroke medium of fish.jpg.
 
-PAINTING METHOD
+Recolor all redrawn skin to the blue/purple/cyan watercolor texture sampled from the fish head in fish.jpg.
 
-Draw the face directly onto the existing fish surface using the same watercolor / digital-paint texture as fish.jpg.
+Blend the new skin paint gradually into the surrounding fish-head texture so there is no visible layer separation.
 
-Recolor the redrawn skin to match the template head tones (blue/purple/cyan paint diffusion).
+Mouth must appear as bright yellow pout lips consistent with fish.jpg while matching subject expression.
 
-Let the paint of the new skin extend naturally until it meets the original crispy edge of the fish illustration, so the subject’s face feels fused into the fish material.
+ACCESSORIES TRANSFER
 
-MOUTH RULE
+If subject wears hat/glasses/jewelry → redraw them on the fish head in same brush medium.
 
-mouth color should be yellow with rough black stroke edge, regardless of how the character's mouth color is. same art style as the fish.
+Hair → interpret as flowing painted strokes.
 
-ACCESSORIES
+ABSOLUTE CONSTANTS
 
-Redraw hats, glasses, and jewelry onto the fish head in the illustrated texture.
+Fish body, fins, tail, and scale layout → remain EXACT pixels from fish.jpg.
 
-NEVER
+Background → remain pure black (#000000).
 
-No realism, no photo collage, no added borders, no body edits.
+FORBIDDEN
+
+No realism
+
+No photo collage
+
+No new outlines, borders, or internal face edges
+
+No body edits outside head
+
+OUTPUT
+
+Produce one fully illustrated image: recognizable likeness fused into the single Rainbow Fish template using identical stroke medium.
 `;
 
       const payload = {
