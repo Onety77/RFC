@@ -43,7 +43,6 @@ const App = () => {
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState(null);
   const [view, setView] = useState('landing'); 
-  const [showLore, setShowLore] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [viewFullImage, setViewFullImage] = useState(false);
@@ -95,7 +94,7 @@ const App = () => {
       const pullSensitivity = 0.85; 
       targetY.current += e.deltaY * pullSensitivity;
 
-      const maxDepth = 2500;
+      const maxDepth = 2000;
       if (targetY.current < 0) targetY.current = 0;
       if (targetY.current > maxDepth) targetY.current = maxDepth;
     };
@@ -162,113 +161,42 @@ const App = () => {
     try {
       const referenceFishBase64 = await getBase64FromUrl('fish.jpg');
       
-      const prompt = `You are the Sacred Tailor of the Rainbow Fish Cult ($RFC).
-
-
+      const prompt = `You are the Lead Artist of the Rainbow Fish Cult ($RFC).
 
 REFERENCE IMAGES:
-
-
-
-Image 1 (fish.jpg): The SACRED BASE MODEL. Use this for the absolute ANATOMY, POSE, and ART STYLE.
-
-
-
-Image 2 (User PFP): The AESTHETIC SOURCE. Use this for the eyes, hair, headwear, and clothing patterns/colors.
-
-
+1. Image 1 (fish.jpg): The SACRED BASE MODEL. Use this for the absolute ANATOMY, POSE, and ART STYLE.
+2. Image 2 (User PFP): THE AESTHETIC SOURCE. Use this for the eyes, hair, headwear, and clothing patterns/colors.
 
 MISSION: > Decorate the fish from Image 1 using the visual identity of the character in Image 2. The fish must remain in its original swimming posture.
 
-
-
 STEP-BY-STEP RITUAL:
 
-
-
 EYE TRANSPLANT:
-
-
-
 Replace the fish's eyes from Image 1 with the exact eyes (shape, iris color, expression) of the character in Image 2.
-
-
-
 Redraw these eyes using the "sketchy," hand-painted digital medium of the fish.
-
-
-
 Keep the fish's original head shape and its signature yellow/gold lips.
 
-ANATOMICAL OVERRIDE: Do not default to human eyes. Analyze the character in Image 2. If their eyes are dots, glowing orbs, hollow sockets, or stylized symbols (crosses, spirals, etc.), the fish must adopt that exact morphology.
-
-
-
 HEADWEAR & HAIR INTEGRATION:
-
-
-
 If the character in Image 2 has a hat, crown, or hair, draw a version of it onto the fish's head.
-
-
-
 The accessory must follow the curve of the fish's head and fins organically. It should look like the fish is "wearing" it.
 
-
-
 THE AESTHETIC WRAP (CLOTHING):
-
-
-
 DO NOT make the fish stand up or wear the shirt like a human.
-
-
-
 IGNORE LOWER BODY: Absolutely ignore any trousers, pants, shorts, or shoes present in Image 2. These have no place in the shoal.
-
-
-
 Instead, apply the colors, patterns, and textures of the character's shirt/dress as a "Sacred Wrap" or "Custom Skin" onto the fish's front belly and side-body area.
-
-
-
 The "Shirt-Skin" must follow the fish's natural curved posture PROFESSIONALLY, fitting and covering the fish body perfectly like a tailored second skin.
-
-
-
 If the character wears a suit, the fish's scales in that area should adopt the texture and color of the suit fabric, respecting the fish's natural curved posture.
 
-
-
 MEDIUM & TEXTURE ENFORCEMENT:
-
-
-
 FORBIDDEN: Realistic skin, photo-filters, or smooth 3D rendering.
-
-
-
 MANDATORY: Everything must be rendered in the "messy," textured, hand-drawn digital paint style of Image 1.
-
-
-
 The final image must look like a professional, hand-painted concept art piece.
 
-
-
 THE ABYSSAL BACKGROUND:
-
-
-
 Set the fish in a PURE ABYSSAL BLACK (#000000) void.
-
-
-
 Add subtle bioluminescent glowing spores and faint, sketchy iridescent bubble trails.
 
-
-
-FINAL CHECK: Does the fish look like it’s wearing a "skin" based on the person? Is the fish's original swimming pose preserved? Have trousers and shoes been correctly ignored? If the AI forced the fish to stand up or gave it a human nose, the ritual has failed. 
+FINAL CHECK: Does the fish look like it’s wearing a "skin" based on the person? Is the fish's original swimming pose preserved? Have trousers and shoes been correctly ignored? If the AI forced the fish to stand up or gave it a human nose, the ritual has failed.
 `;
 
       const payload = {
@@ -399,29 +327,34 @@ FINAL CHECK: Does the fish look like it’s wearing a "skin" based on the person
             transform: scale(1.05) translateY(-5px);
           }
 
-          @keyframes wave-flow {
-            0% { transform: translateX(-50%) skewY(0deg); }
-            50% { transform: translateX(-48%) skewY(2deg); }
-            100% { transform: translateX(-50%) skewY(0deg); }
+          /* New Progress Animation: Bioluminescent Materialization */
+          @keyframes aura-pulse {
+            0%, 100% { box-shadow: 0 0 40px rgba(34, 211, 238, 0.1), inset 0 0 20px rgba(34, 211, 238, 0.05); }
+            50% { box-shadow: 0 0 100px rgba(34, 211, 238, 0.3), inset 0 0 50px rgba(34, 211, 238, 0.2); }
+          }
+          @keyframes core-breathe {
+            0%, 100% { transform: scale(0.9); opacity: 0.3; filter: blur(40px); }
+            50% { transform: scale(1.2); opacity: 0.8; filter: blur(60px); }
+          }
+          @keyframes particle-rise {
+            0% { transform: translateY(100%) scale(1); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-100%) scale(0.5); opacity: 0; }
           }
 
-          .tide-fill {
-            transition: height 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-            background: linear-gradient(to top, rgba(34,211,238,0.6), rgba(244,114,182,0.4), transparent);
-            position: relative;
-            overflow: hidden;
+          .aura-container {
+            animation: aura-pulse 3s ease-in-out infinite;
           }
-          .tide-fill::after {
-            content: '';
+          .bio-core {
+            background: radial-gradient(circle, #22d3ee, #f472b6, transparent);
+            animation: core-breathe 4s ease-in-out infinite;
+          }
+          .particle {
             position: absolute;
-            top: -10px;
-            left: -50%;
-            width: 200%;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.3);
-            filter: blur(8px);
-            border-radius: 40%;
-            animation: wave-flow 3s ease-in-out infinite;
+            background: white;
+            border-radius: 50%;
+            filter: blur(1px);
+            animation: particle-rise linear infinite;
           }
 
           #distort-filter { filter: url(#wavy); }
@@ -448,21 +381,6 @@ FINAL CHECK: Does the fish look like it’s wearing a "skin" based on the person
         }}
       />
 
-      {/* SVG Liquid Filters */}
-      <svg className="hidden">
-        <defs>
-          <filter id="wavy">
-            <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="3" result="noise" />
-            <feDisplacementMap in="SourceGraphic" in2="noise" scale="20" />
-          </filter>
-        </defs>
-      </svg>
-
-      {/* Interaction Ripples */}
-      {ripples.map(r => (
-        <div key={r.id} className="ripple" style={{ left: r.x, top: r.y }} />
-      ))}
-
       {/* Main Perspective Container */}
       <div className="buoyant-view relative z-10 w-full" style={{ transform: `translate3d(${-position.x}px, ${-position.y}px, 0)` }}>
         <nav className="flex items-center justify-between px-4 py-6 md:px-16 md:py-10">
@@ -478,9 +396,6 @@ FINAL CHECK: Does the fish look like it’s wearing a "skin" based on the person
             <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="font-bold opacity-40 hover:opacity-100 hover:text-pink-400 transition-all flex items-center gap-2 uppercase tracking-[0.3em] text-xs">
               <MessageCircle className="w-4 h-4" /> COMMUNITY
             </a>
-            <button onClick={() => setShowLore(true)} className="glass-btn px-10 py-3 liquid-blob font-bold uppercase text-[10px] tracking-[0.4em]">
-              LORE
-            </button>
           </div>
 
           <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden glass-btn p-3 liquid-blob">
@@ -491,7 +406,7 @@ FINAL CHECK: Does the fish look like it’s wearing a "skin" based on the person
         <main className="container mx-auto px-4 md:px-6 py-6 md:py-12 flex flex-col items-center justify-center min-h-[80vh]">
           {view === 'landing' ? (
             <div className="text-center max-w-6xl py-10 md:py-20" style={{ transform: `translate3d(${mousePos.x * -0.2}px, ${mousePos.y * -0.2}px, 0)` }}>
-              <h2 className="text-3xl sm:text-5xl md:text-[12rem] font-title shimmer-text mb-6 md:mb-12 tracking-tighter leading-[0.8] transition-transform duration-1000 group cursor-default">
+              <h2 className="text-4xl sm:text-7xl md:text-[12rem] font-title shimmer-text mb-6 md:mb-12 tracking-tighter leading-[0.8] transition-transform duration-1000 group cursor-default">
                 SUBMERGE YOURSELF
               </h2>
               <h1 className="text-xl sm:text-3xl md:text-[4rem] font-bold italic text-white/20 mb-10 md:mb-20 tracking-[0.4em] leading-none uppercase">
@@ -520,9 +435,6 @@ FINAL CHECK: Does the fish look like it’s wearing a "skin" based on the person
                   <span className="relative z-10 shimmer-text group-hover:text-white transition-all duration-700">JOIN THE CULT</span>
                   <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-pink-500 opacity-0 group-hover:opacity-10 transition-opacity" />
                 </button>
-                <button onClick={() => setShowLore(true)} className="text-lg md:text-2xl font-bold opacity-20 hover:opacity-100 transition-all uppercase tracking-[0.5em] flex items-center gap-3 md:gap-4">
-                  THE LORE <ChevronLeft className="w-6 h-6 rotate-180" />
-                </button>
               </div>
             </div>
           ) : (
@@ -534,7 +446,7 @@ FINAL CHECK: Does the fish look like it’s wearing a "skin" based on the person
 
               <div className="flex flex-col lg:flex-row gap-12 lg:gap-24 items-center justify-center w-full">
                 <div className="w-full lg:w-1/2 space-y-10 md:space-y-16">
-                  <h2 className="text-5xl sm:text-7xl md:text-[10rem] font-title shimmer-text -rotate-2 leading-none">TRANSFORM</h2>
+                  <h2 className="text-3xl sm:text-4xl md:text-[10rem] font-title shimmer-text -rotate-2 leading-none">TRANSFORM</h2>
                   <div className={`relative aspect-square transition-all liquid-blob glass-btn group ${image ? 'p-2 md:p-3' : 'cursor-pointer hover:bg-cyan-400/5 shadow-[0_0_50px_rgba(34,211,238,0.1)]'}`} onClick={() => !image && fileInputRef.current.click()}>
                     {image ? (
                       <img src={image} className="w-full h-full object-cover liquid-blob" alt="Source" />
@@ -550,7 +462,7 @@ FINAL CHECK: Does the fish look like it’s wearing a "skin" based on the person
                   </div>
                   <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
                   <button disabled={!image || isProcessing} onClick={() => fishifyImage(image)} className={`w-full py-10 md:py-16 text-3xl md:text-6xl font-title uppercase transition-all glass-btn ${!image || isProcessing ? 'opacity-20 cursor-wait' : 'hover:text-cyan-400 shadow-[0_0_80px_rgba(34,211,238,0.2)]'}`} style={{ borderRadius: '80px 250px 80px 250px / 250px 80px 250px 80px' }}>
-                    {isProcessing ? "HATCHING..." : "FISHIFY"}
+                    {isProcessing ? "SHIMMERING..." : "FISHIFY"}
                   </button>
                 </div>
 
@@ -558,8 +470,21 @@ FINAL CHECK: Does the fish look like it’s wearing a "skin" based on the person
                   <div className="relative w-full max-w-lg aspect-square">
                     <div className={`relative w-full h-full liquid-blob glass-btn shadow-[0_0_120px_rgba(0,0,0,0.8)] overflow-hidden transition-all duration-1000 ${processedImage ? 'cursor-zoom-in group' : ''}`} onClick={() => processedImage && setViewFullImage(true)}>
                       {isProcessing && (
-                        <div className="absolute bottom-0 left-0 w-full tide-fill z-10" style={{ height: `${progress}%` }}>
-                          <div className="absolute top-0 left-0 w-full h-4 md:h-8 bg-white/40 blur-xl animate-pulse" />
+                        <div className="absolute inset-0 aura-container z-10 flex items-center justify-center pointer-events-none">
+                          <div className="bio-core w-40 h-40 rounded-full" />
+                          {[...Array(15)].map((_, i) => (
+                            <div 
+                              key={i} 
+                              className="particle"
+                              style={{
+                                width: Math.random() * 6 + 2 + 'px',
+                                height: Math.random() * 6 + 2 + 'px',
+                                left: Math.random() * 100 + '%',
+                                animationDuration: Math.random() * 2 + 1 + 's',
+                                animationDelay: Math.random() * 2 + 's'
+                              }}
+                            />
+                          ))}
                         </div>
                       )}
                       {processedImage ? (
@@ -572,7 +497,7 @@ FINAL CHECK: Does the fish look like it’s wearing a "skin" based on the person
                           {isProcessing ? (
                             <div className="space-y-8 md:space-y-12">
                               <Waves className="w-20 h-20 md:w-32 md:h-32 mx-auto text-cyan-400 animate-bounce" />
-                              <p className="text-3xl md:text-5xl font-title shimmer-text">GENERATING...</p>
+                              <p className="text-3xl md:text-5xl font-title shimmer-text">HATCHING...</p>
                             </div>
                           ) : (
                             <div className="space-y-8 md:space-y-12 opacity-5"><Fish className="w-24 h-24 md:w-40 md:h-40 mx-auto" /><p className="text-2xl md:text-4xl font-bold tracking-tighter uppercase font-title">THE SHOAL WAITS</p></div>
@@ -586,45 +511,20 @@ FINAL CHECK: Does the fish look like it’s wearing a "skin" based on the person
             </div>
           )}
           
-          <footer className="w-full py-20 md:py-40 flex flex-col items-center gap-12 md:gap-20 border-t-2 border-dashed border-white/5 mt-20 md:mt-40">
-            <div className="flex gap-16 md:gap-24 opacity-20 hover:opacity-100 transition-all duration-1000 scale-125 md:scale-[2]">
-              <Fish className="hover:text-cyan-400 cursor-pointer" />
-              <Shield className="hover:text-pink-400 cursor-pointer" />
-              <Info className="hover:text-yellow-400 cursor-pointer" />
-            </div>
-            <div className="text-lg md:text-1xl font-bold opacity-10 tracking-[1em] uppercase text-center font-title pb-10">
+          <footer className="w-full py-20 md:py-40 flex flex-col items-center border-t-2 border-dashed border-white/5 mt-20 md:mt-40">
+            <div className="text-lg md:text-2xl font-bold opacity-10 tracking-[1.5em] uppercase text-center font-title pb-10">
               $RFC • WE SHIMMER • © 2026
             </div>
           </footer>
         </main>
       </div>
 
-      {/* Lore Sanctuary */}
-      {showLore && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 md:p-12 bg-black/98 backdrop-blur-3xl animate-in zoom-in duration-700">
-          <div className="max-w-5xl w-full bg-[#050505] border-2 border-white/10 p-6 md:p-24 relative overflow-hidden liquid-blob glass-btn flex flex-col" style={{ borderRadius: '80px 40px', maxHeight: '94vh' }}>
-            <button onClick={() => setShowLore(false)} className="absolute top-6 right-6 md:top-10 md:right-10 p-4 border border-white/10 hover:border-white transition-all rounded-full z-[1100] bg-[#050505] hover:text-red-400"><X className="w-8 h-8" /></button>
-            <div className="relative overflow-y-auto flex-1 pr-6 custom-scrollbar flex flex-col pt-6 md:pt-10">
-              <h2 className="text-5xl md:text-[10rem] font-title shimmer-text mb-10 md:mb-20 sticky top-0 bg-[#050505]/95 py-4 md:py-8 z-10 leading-none uppercase">LORE</h2>
-              <div className="space-y-10 md:space-y-24 text-2xl md:text-5xl font-light italic leading-tight opacity-90 pb-40">
-                <p className="border-l-[8px] md:border-l-[12px] border-cyan-400/20 pl-6 md:pl-12">"In the beginning, there was only the <span className="text-white font-bold underline decoration-pink-500">flicker</span>. We are the ones who refused to swim in straight lines."</p>
-                <p>We are a <span className="text-pink-400 font-bold uppercase">shoal</span> of shimmering errors. We don't pray to the sun; we pray to the bioluminescence of the deep.</p>
-                <p className="font-title text-2xl md:text-5xl text-cyan-300 tracking-wider">The cult was founded in cosmic boredom. We believe if you aren't glowing, you're essentially invisible to the abyss.</p>
-                <p>Glub. Glub. Shimmer. Win. <br /><span className="text-white/40 text-xl md:text-4xl mt-6 md:mt-12 block">— Never touch the glass. —</span></p>
-              </div>
-            </div>
-            <button onClick={() => setShowLore(false)} className="mt-6 md:mt-12 w-full py-8 md:py-14 glass-btn font-title text-2xl md:text-5xl hover:text-cyan-400 transition-all shrink-0 bg-black/50 z-[1050]">I EMBRACE THE SPECTRUM</button>
-          </div>
-        </div>
-      )}
-
       {/* Mobile Nav Overlay */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-[1500] bg-black/98 backdrop-blur-2xl flex flex-col items-center justify-center p-8 md:p-12 gap-12 md:gap-20 animate-in slide-in-from-top duration-700">
           <button onClick={() => setIsMobileMenuOpen(false)} className="absolute top-6 right-6 p-4 glass-btn rounded-full"><X className="w-8 h-8" /></button>
-          <a href="https://pump.fun/" target="_blank" rel="noopener noreferrer" className="text-4xl md:text-7xl font-title shimmer-text" onClick={() => setIsMobileMenuOpen(false)}><TrendingUp className="w-8 h-8 md:w-12 md:h-12 inline mr-4" />BUY</a>
-          <a href="https://x.com/" target="_blank" rel="noopener noreferrer" className="text-4xl md:text-7xl font-title shimmer-text" onClick={() => setIsMobileMenuOpen(false)}><MessageCircle className="w-8 h-8 md:w-12 md:h-12 inline mr-4" />COMMUNITY</a>
-          <button onClick={() => { setShowLore(true); setIsMobileMenuOpen(false); }} className="text-4xl md:text-7xl font-title shimmer-text"><BookOpen className="w-8 h-8 md:w-12 md:h-12 inline mr-4" />LORE</button>
+          <a href="https://pump.fun" target="_blank" rel="noopener noreferrer" className="text-4xl md:text-7xl font-title shimmer-text" onClick={() => setIsMobileMenuOpen(false)}><TrendingUp className="w-8 h-8 md:w-12 md:h-12 inline mr-4" />BUY</a>
+          <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="text-4xl md:text-7xl font-title shimmer-text" onClick={() => setIsMobileMenuOpen(false)}><MessageCircle className="w-8 h-8 md:w-12 md:h-12 inline mr-4" />COMMUNITY</a>
         </div>
       )}
 
@@ -634,10 +534,27 @@ FINAL CHECK: Does the fish look like it’s wearing a "skin" based on the person
           <button onClick={() => setViewFullImage(false)} className="absolute top-6 right-6 p-4 glass-btn rounded-full text-white"><X className="w-8 h-8 md:w-12 md:h-12" /></button>
           <div className="max-w-5xl w-full flex flex-col items-center gap-10 md:gap-20">
             <div className="liquid-blob glass-btn p-3 md:p-5 shadow-[0_0_200px_rgba(34,211,238,0.3)]"><img src={processedImage} className="w-full max-h-[60vh] md:max-h-[75vh] object-contain rounded-[20px] md:rounded-[40px]" alt="HD Transformation" /></div>
-            <a href={processedImage} download="rfc-transformed.png" className="glass-btn px-16 py-8 md:px-32 md:py-12 text-white bg-white font-title text-2xl md:text-6xl hover:bg-cyan-400 transition-all shadow-2xl" style={{ borderRadius: '150px 40px' }}><Download className="w-8 h-8 md:w-14 text-white md:h-14 inline mr-4 md:mr-8" /> DOWNLOAD</a>
+            <a 
+              href={processedImage} 
+              download="rfc-transformed.png" 
+              className="glass-btn px-16 py-8 md:px-32 md:py-12 text-black bg-white font-title text-2xl md:text-6xl hover:bg-cyan-400 transition-all shadow-2xl flex items-center gap-4" 
+              style={{ borderRadius: '150px 40px' }}
+            >
+              <Download className="w-8 h-8 md:w-14 md:h-14" /> DOWNLOAD
+            </a>
           </div>
         </div>
       )}
+
+      {/* SVG Liquid Filters */}
+      <svg className="hidden">
+        <defs>
+          <filter id="wavy">
+            <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="3" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="20" />
+          </filter>
+        </defs>
+      </svg>
     </div>
   );
 };
