@@ -63,7 +63,6 @@ const App = () => {
     const acceleration = 0.04; 
     
     velocity.current.y *= friction;
-    
     const dy = (targetY.current - position.y);
     velocity.current.y += dy * acceleration;
 
@@ -90,18 +89,17 @@ const App = () => {
 
   useEffect(() => {
     const handleWheel = (e) => {
+      if (viewFullImage || isMobileMenuOpen) return;
       e.preventDefault();
       const pullSensitivity = 0.85; 
       targetY.current += e.deltaY * pullSensitivity;
-
       const maxDepth = 2000;
       if (targetY.current < 0) targetY.current = 0;
       if (targetY.current > maxDepth) targetY.current = maxDepth;
     };
-    
     window.addEventListener('wheel', handleWheel, { passive: false });
     return () => window.removeEventListener('wheel', handleWheel);
-  }, []);
+  }, [viewFullImage, isMobileMenuOpen]);
 
   useEffect(() => {
     const handleMove = (e) => {
@@ -327,34 +325,60 @@ FINAL CHECK: Does the fish look like it’s wearing a "skin" based on the person
             transform: scale(1.05) translateY(-5px);
           }
 
-          /* New Progress Animation: Bioluminescent Materialization */
-          @keyframes aura-pulse {
-            0%, 100% { box-shadow: 0 0 40px rgba(34, 211, 238, 0.1), inset 0 0 20px rgba(34, 211, 238, 0.05); }
-            50% { box-shadow: 0 0 100px rgba(34, 211, 238, 0.3), inset 0 0 50px rgba(34, 211, 238, 0.2); }
+          /* --- UPGRADED ABYSS TIDE PROGRESS --- */
+          @keyframes wave-crest {
+            0%, 100% { transform: translateY(0) scaleY(1); }
+            50% { transform: translateY(-8px) scaleY(1.1); }
           }
-          @keyframes core-breathe {
-            0%, 100% { transform: scale(0.9); opacity: 0.3; filter: blur(40px); }
-            50% { transform: scale(1.2); opacity: 0.8; filter: blur(60px); }
+          @keyframes tide-glow {
+            0%, 100% { filter: brightness(1) drop-shadow(0 0 10px rgba(34, 211, 238, 0.4)); }
+            50% { filter: brightness(1.3) drop-shadow(0 0 25px rgba(34, 211, 238, 0.8)); }
           }
-          @keyframes particle-rise {
-            0% { transform: translateY(100%) scale(1); opacity: 0; }
-            50% { opacity: 1; }
-            100% { transform: translateY(-100%) scale(0.5); opacity: 0; }
+          @keyframes internal-pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+          }
+          @keyframes slow-rise {
+            0% { transform: translateY(20px) scale(1); opacity: 0; }
+            100% { transform: translateY(-40px) scale(0.5); opacity: 0.8; }
           }
 
-          .aura-container {
-            animation: aura-pulse 3s ease-in-out infinite;
+          .tide-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            transition: height 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            background: linear-gradient(to top, 
+              rgba(34, 211, 238, 0.8) 0%, 
+              rgba(244, 114, 182, 0.6) 60%, 
+              rgba(34, 211, 238, 0.2) 95%,
+              transparent 100%
+            );
+            z-index: 10;
           }
-          .bio-core {
-            background: radial-gradient(circle, #22d3ee, #f472b6, transparent);
-            animation: core-breathe 4s ease-in-out infinite;
+          .tide-surface {
+            position: absolute;
+            top: -15px;
+            left: 0;
+            width: 100%;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(4px);
+            clip-path: polygon(0 50%, 10% 40%, 20% 50%, 30% 60%, 40% 50%, 50% 40%, 60% 50%, 70% 60%, 80% 50%, 90% 40%, 100% 50%, 100% 100%, 0 100%);
+            animation: wave-crest 3s ease-in-out infinite, tide-glow 2s ease-in-out infinite;
           }
-          .particle {
+          .tide-internal {
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: internal-pulse 4s ease-in-out infinite;
+          }
+          .tide-particle {
             position: absolute;
             background: white;
             border-radius: 50%;
-            filter: blur(1px);
-            animation: particle-rise linear infinite;
+            animation: slow-rise linear infinite;
           }
 
           #distort-filter { filter: url(#wavy); }
@@ -380,6 +404,21 @@ FINAL CHECK: Does the fish look like it’s wearing a "skin" based on the person
           mixBlendMode: 'plus-lighter'
         }}
       />
+
+      {/* SVG Liquid Filters */}
+      <svg className="hidden">
+        <defs>
+          <filter id="wavy">
+            <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="3" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="20" />
+          </filter>
+        </defs>
+      </svg>
+
+      {/* Interaction Ripples */}
+      {ripples.map(r => (
+        <div key={r.id} className="ripple" style={{ left: r.x, top: r.y }} />
+      ))}
 
       {/* Main Perspective Container */}
       <div className="buoyant-view relative z-10 w-full" style={{ transform: `translate3d(${-position.x}px, ${-position.y}px, 0)` }}>
@@ -446,7 +485,7 @@ FINAL CHECK: Does the fish look like it’s wearing a "skin" based on the person
 
               <div className="flex flex-col lg:flex-row gap-12 lg:gap-24 items-center justify-center w-full">
                 <div className="w-full lg:w-1/2 space-y-10 md:space-y-16">
-                  <h2 className="text-3xl sm:text-4xl md:text-[10rem] font-title shimmer-text -rotate-2 leading-none">TRANSFORM</h2>
+                  <h2 className="text-5xl sm:text-7xl md:text-[10rem] font-title shimmer-text -rotate-2 leading-none">TRANSFORM</h2>
                   <div className={`relative aspect-square transition-all liquid-blob glass-btn group ${image ? 'p-2 md:p-3' : 'cursor-pointer hover:bg-cyan-400/5 shadow-[0_0_50px_rgba(34,211,238,0.1)]'}`} onClick={() => !image && fileInputRef.current.click()}>
                     {image ? (
                       <img src={image} className="w-full h-full object-cover liquid-blob" alt="Source" />
@@ -462,31 +501,35 @@ FINAL CHECK: Does the fish look like it’s wearing a "skin" based on the person
                   </div>
                   <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
                   <button disabled={!image || isProcessing} onClick={() => fishifyImage(image)} className={`w-full py-10 md:py-16 text-3xl md:text-6xl font-title uppercase transition-all glass-btn ${!image || isProcessing ? 'opacity-20 cursor-wait' : 'hover:text-cyan-400 shadow-[0_0_80px_rgba(34,211,238,0.2)]'}`} style={{ borderRadius: '80px 250px 80px 250px / 250px 80px 250px 80px' }}>
-                    {isProcessing ? "SHIMMERING..." : "FISHIFY"}
+                    {isProcessing ? "GENERATING..." : "FISHIFY"}
                   </button>
                 </div>
 
                 <div className="w-full lg:w-1/2 flex justify-center relative">
                   <div className="relative w-full max-w-lg aspect-square">
                     <div className={`relative w-full h-full liquid-blob glass-btn shadow-[0_0_120px_rgba(0,0,0,0.8)] overflow-hidden transition-all duration-1000 ${processedImage ? 'cursor-zoom-in group' : ''}`} onClick={() => processedImage && setViewFullImage(true)}>
+                      
+                      {/* UPGRADED ABYSS TIDE PROGRESS */}
                       {isProcessing && (
-                        <div className="absolute inset-0 aura-container z-10 flex items-center justify-center pointer-events-none">
-                          <div className="bio-core w-40 h-40 rounded-full" />
-                          {[...Array(15)].map((_, i) => (
+                        <div className="tide-container" style={{ height: `${progress}%` }}>
+                          <div className="tide-surface" />
+                          <div className="tide-internal" />
+                          {[...Array(10)].map((_, i) => (
                             <div 
                               key={i} 
-                              className="particle"
-                              style={{
+                              className="tide-particle" 
+                              style={{ 
                                 width: Math.random() * 6 + 2 + 'px',
                                 height: Math.random() * 6 + 2 + 'px',
                                 left: Math.random() * 100 + '%',
-                                animationDuration: Math.random() * 2 + 1 + 's',
+                                animationDuration: Math.random() * 3 + 2 + 's',
                                 animationDelay: Math.random() * 2 + 's'
-                              }}
+                              }} 
                             />
                           ))}
                         </div>
                       )}
+
                       {processedImage ? (
                         <div className="w-full h-full relative animate-in fade-in zoom-in duration-1000">
                           <img src={processedImage} className="w-full h-full object-cover" alt="Ascended" />
@@ -531,16 +574,16 @@ FINAL CHECK: Does the fish look like it’s wearing a "skin" based on the person
       {/* HD Lightbox */}
       {viewFullImage && (
         <div className="fixed inset-0 z-[3000] flex items-center justify-center p-4 md:p-6 bg-black/99 backdrop-blur-3xl animate-in fade-in duration-700">
-          <button onClick={() => setViewFullImage(false)} className="absolute top-6 right-6 p-4 glass-btn rounded-full text-white"><X className="w-8 h-8 md:w-12 md:h-12" /></button>
+          <button onClick={() => setViewFullImage(false)} className="absolute top-6 right-6 p-4 glass-btn rounded-full text-white"><X className="w-10 h-10 md:w-12 md:h-12" /></button>
           <div className="max-w-5xl w-full flex flex-col items-center gap-10 md:gap-20">
             <div className="liquid-blob glass-btn p-3 md:p-5 shadow-[0_0_200px_rgba(34,211,238,0.3)]"><img src={processedImage} className="w-full max-h-[60vh] md:max-h-[75vh] object-contain rounded-[20px] md:rounded-[40px]" alt="HD Transformation" /></div>
             <a 
               href={processedImage} 
               download="rfc-transformed.png" 
-              className="glass-btn px-16 py-8 md:px-32 md:py-12 text-black bg-white font-title text-2xl md:text-6xl hover:bg-cyan-400 transition-all shadow-2xl flex items-center gap-4" 
+              className="glass-btn px-16 py-8 md:px-32 md:py-12 text-white bg-white font-title text-2xl md:text-6xl hover:bg-cyan-400 transition-all shadow-2xl flex items-center gap-4" 
               style={{ borderRadius: '150px 40px' }}
             >
-              <Download className="w-8 h-8 md:w-14 md:h-14" /> DOWNLOAD
+              <Download className="w-8 h-8 text-white md:w-14 md:h-14" /> DOWNLOAD
             </a>
           </div>
         </div>
